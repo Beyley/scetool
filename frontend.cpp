@@ -19,6 +19,7 @@
 #include "spp.h"
 #include "util.h"
 #include "tables.h"
+#include "frontend.h"
 
 /*! Parameters. */
 extern s8 *_template;
@@ -294,7 +295,7 @@ static BOOL _fill_npdrm_config(self_config_t *sconf)
 	return TRUE;
 }
 
-void frontend_print_infos(s8 *file)
+export void frontend_print_infos(s8 *file)
 {
 	u8 *buf = _read_buffer(file, NULL);
 	if(buf != NULL)
@@ -351,7 +352,7 @@ void frontend_print_infos(s8 *file)
 		printf("[*] Error: Could not load %s\n", file);
 }
 
-void frontend_decrypt(s8 *file_in, s8 *file_out)
+export void frontend_decrypt(s8 *file_in, s8 *file_out)
 {
 	u8 *buf = _read_buffer(file_in, NULL);
 	if(buf != NULL)
@@ -435,7 +436,7 @@ void frontend_decrypt(s8 *file_in, s8 *file_out)
 		printf("[*] Error: Could not load %s\n", file_in);
 }
 
-void frontend_encrypt(s8 *file_in, s8 *file_out)
+export void frontend_encrypt(s8 *file_in, s8 *file_out)
 {
 	BOOL can_compress = FALSE;
 	self_config_t sconf;

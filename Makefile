@@ -1,6 +1,8 @@
 CC=gcc
-CFLAGS=-g -O0 -Wall
+CFLAGS=-g -O0 -Wall -fPIC
+LINKFLAGS=
 OS_TARGET=scetool
+SHARED_TARGET=libscetool.so
 LDFLAGS=-lz
 BUILDFOLDER=build
 OBJS=aes.o aes_omac.o bn.o ec.o ecdsa.o frontend.o getopt.o keys.o list.o \
@@ -8,13 +10,30 @@ OBJS=aes.o aes_omac.o bn.o ec.o ecdsa.o frontend.o getopt.o keys.o list.o \
 .SILENT:
 .SUFFIXES: .c .cpp .o
 
+all: $(OS_TARGET) $(SHARED_TARGET)
+.PHONY: all
+
 $(OS_TARGET): $(OBJS)
 	${LINK}
-	if cd $(BUILDFOLDER); $(CC) $(CFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
+	# Build the scetool executable
+	if cd $(BUILDFOLDER); $(CC) $(CFLAGS) $(LINKFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
 		${LINK_OK}; \
 	else \
 		${LINK_FAILED}; \
 	fi
+	# Copy the scetool executable to the root directory
+	cp $(BUILDFOLDER)/$(OS_TARGET) .
+
+$(SHARED_TARGET): $(OBJS)
+	${LINK}
+	# Build the scetool shared library
+	if cd $(BUILDFOLDER); $(CC) -shared $(CFLAGS) $(OBJS) -o $(SHARED_TARGET) $(LDFLAGS) $(LIBS); then \
+		${LINK_OK}; \
+	else \
+		${LINK_FAILED}; \
+	fi
+	# Copy the scetool shared folder to the root directory
+	cp $(BUILDFOLDER)/$(SHARED_TARGET) .
 
 %.o: %.c
 	mkdir -p $(BUILDFOLDER)
@@ -36,7 +55,7 @@ $(OS_TARGET): $(OBJS)
 
 clean:
 	@printf "\033[K\033[0;32mCleaning\033[1;32m\033[0;32m...\033[0m\n"
-	rm -rf *.o $(OS_TARGET)
+	rm -rf build/* $(OS_TARGET) $(SHARED_TARGET)
 
 install:
 	@printf "\033[K\033[0;32mInstalling\033[1;32m\033[0;32m...\033[0m\n"

@@ -7,8 +7,14 @@
 #ifndef _FRONTEND_H_
 #define _FRONTEND_H_
 
-void frontend_print_infos(s8 *file);
-void frontend_decrypt(s8 *file_in, s8 *file_out);
-void frontend_encrypt(s8 *file_in, s8 *file_out);
+#if __cplusplus
+#define export extern "C"
+#else
+#define export
+#endif
+
+export void frontend_print_infos(s8 *file);
+export void frontend_decrypt(s8 *file_in, s8 *file_out);
+export void frontend_encrypt(s8 *file_in, s8 *file_out);
 
 #endif
