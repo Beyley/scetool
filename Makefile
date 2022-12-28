@@ -2,6 +2,7 @@ CC=gcc
 CFLAGS=-g -O0 -Wall
 OS_TARGET=scetool
 LDFLAGS=-lz
+BUILDFOLDER=build
 OBJS=aes.o aes_omac.o bn.o ec.o ecdsa.o frontend.o getopt.o keys.o list.o \
 	main.o mt19937.o np.o rvk.o sce.o self.o sha1.o tables.o util.o spp.o
 .SILENT:
@@ -9,24 +10,25 @@ OBJS=aes.o aes_omac.o bn.o ec.o ecdsa.o frontend.o getopt.o keys.o list.o \
 
 $(OS_TARGET): $(OBJS)
 	${LINK}
-	if $(CC) $(CFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
+	if cd $(BUILDFOLDER); $(CC) $(CFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
 		${LINK_OK}; \
 	else \
 		${LINK_FAILED}; \
 	fi
-	
 
 %.o: %.c
+	mkdir -p $(BUILDFOLDER)
 	${COMPILE_STATUS}
-	if ${CC} ${CFLAGS} ${CFLAGS} -c -o $@ $<; then \
+	if ${CC} ${CFLAGS} ${CFLAGS} -c -o $(BUILDFOLDER)/$@ $<; then \
 		${COMPILE_OK}; \
 	else \
 		${COMPILE_FAILED}; \
 	fi
 
 %.o: %.cpp
+	mkdir -p $(BUILDFOLDER)
 	${COMPILE_STATUS}
-	if ${CC} ${CFLAGS} ${CFLAGS} -c -o $@ $<; then \
+	if ${CC} ${CFLAGS} ${CFLAGS} -c -o $(BUILDFOLDER)/$@ $<; then \
 		${COMPILE_OK}; \
 	else \
 		${COMPILE_FAILED}; \
