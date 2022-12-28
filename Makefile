@@ -1,6 +1,5 @@
-CC=gcc
-CFLAGS=-g -O0 -Wall -fPIC
-LINKFLAGS=
+CC=g++
+CFLAGS=-g -O0 -Wall -fPIC 
 OS_TARGET=scetool
 SHARED_TARGET=libscetool.so
 LDFLAGS=-lz
@@ -10,19 +9,31 @@ OBJS=aes.o aes_omac.o bn.o ec.o ecdsa.o frontend.o getopt.o keys.o list.o \
 .SILENT:
 .SUFFIXES: .c .cpp .o
 
+ifdef CROSS_COMPILE_WIN32
+CC = i686-w64-mingw32-g++
+LDFLAGS = -static-libgcc -Wl,-Bstatic -lz
+BUILDFOLDER = build-win32
+SHARED_TARGET = libscetool.dll
+endif
+
+ifdef CROSS_COMPILE_WIN64
+CC = x86_64-w64-mingw32-g++
+LDFLAGS = -static-libgcc -Wl,-Bstatic -lz
+BUILDFOLDER = build-win64
+SHARED_TARGET = libscetool.dll
+endif
+
 all: $(OS_TARGET) $(SHARED_TARGET)
 .PHONY: all
 
 $(OS_TARGET): $(OBJS)
 	${LINK}
 	# Build the scetool executable
-	if cd $(BUILDFOLDER); $(CC) $(CFLAGS) $(LINKFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
+	if cd $(BUILDFOLDER); $(CC) $(CFLAGS) $(OBJS) -o $(OS_TARGET) $(LDFLAGS) $(LIBS); then \
 		${LINK_OK}; \
 	else \
 		${LINK_FAILED}; \
 	fi
-	# Copy the scetool executable to the root directory
-	cp $(BUILDFOLDER)/$(OS_TARGET) .
 
 $(SHARED_TARGET): $(OBJS)
 	${LINK}
@@ -32,8 +43,6 @@ $(SHARED_TARGET): $(OBJS)
 	else \
 		${LINK_FAILED}; \
 	fi
-	# Copy the scetool shared folder to the root directory
-	cp $(BUILDFOLDER)/$(SHARED_TARGET) .
 
 %.o: %.c
 	mkdir -p $(BUILDFOLDER)

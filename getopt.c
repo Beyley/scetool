@@ -502,12 +502,12 @@ int _getopt_internal (int argc, TCHAR *const *argv, const TCHAR *optstring, cons
 	return result;
 }
 
-int getopt (int argc, TCHAR *const *argv, const TCHAR *optstring)
+int getopt (int argc, TCHAR *const *argv, const TCHAR *optstring) noexcept
 {
 	return _getopt_internal (argc, argv, optstring, (const struct option *) 0, (int *) 0, 0, 0);
 }
 
-int getopt_long (int argc, TCHAR *const *argv, const TCHAR *options, const struct option *long_options, int *opt_index)
+int getopt_long (int argc, TCHAR *const *argv, const TCHAR *options, const struct option *long_options, int *opt_index) noexcept
 {
 	return _getopt_internal (argc, argv, options, long_options, opt_index, 0, 0);
 }
@@ -517,7 +517,7 @@ int _getopt_long_r (int argc, TCHAR *const *argv, const TCHAR *options, const st
 	return _getopt_internal_r (argc, argv, options, long_options, opt_index,0, d, 0);
 }
 
-int getopt_long_only (int argc, TCHAR *const *argv, const TCHAR *options, const struct option *long_options, int *opt_index)
+int getopt_long_only (int argc, TCHAR *const *argv, const TCHAR *options, const struct option *long_options, int *opt_index) noexcept
 {
 	return _getopt_internal (argc, argv, options, long_options, opt_index, 1, 0);
 }

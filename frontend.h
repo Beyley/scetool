@@ -13,6 +13,11 @@
 #define export
 #endif
 
+//if windows, we have to use __desclspec(dllexport)
+#ifdef _WIN32
+#define export __declspec(dllexport)
+#endif
+
 export void frontend_print_infos(s8 *file);
 export void frontend_decrypt(s8 *file_in, s8 *file_out);
 export void frontend_encrypt(s8 *file_in, s8 *file_out);
