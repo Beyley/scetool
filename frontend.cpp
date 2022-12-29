@@ -22,29 +22,92 @@
 #include "frontend.h"
 
 /*! Parameters. */
-extern s8 *_template;
-extern s8 *_file_type;
-extern s8 *_compress_data;
-extern s8 *_skip_sections;
-extern s8 *_key_rev;
-extern s8 *_meta_info;
-extern s8 *_keyset;
-extern s8 *_auth_id;
-extern s8 *_vendor_id;
-extern s8 *_self_type;
-extern s8 *_app_version;
-extern s8 *_fw_version;
-extern s8 *_add_shdrs;
-extern s8 *_ctrl_flags;
-extern s8 *_cap_flags;
-#ifdef CONFIG_CUSTOM_INDIV_SEED
-extern s8 *_indiv_seed;
+#ifndef __APPLE__
+extern
 #endif
-extern s8 *_license_type;
-extern s8 *_app_type;
-extern s8 *_content_id;
-extern s8 *_real_fname;
-extern s8 *_add_sig;
+	s8 *_template;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_file_type;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_compress_data;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_skip_sections;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_key_rev;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_meta_info;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_keyset;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_auth_id;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_vendor_id;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_self_type;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_app_version;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_fw_version;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_add_shdrs;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_ctrl_flags;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_cap_flags;
+#ifdef CONFIG_CUSTOM_INDIV_SEED
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_indiv_seed;
+#endif
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_license_type;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_app_type;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_content_id;
+#ifndef __APPLE__
+extern
+#endif 	
+	s8 *_real_fname;
+#ifndef __APPLE__
+extern
+#endif
+	s8 *_add_sig;
 
 static BOOL _is_hexdigit(s8 c)
 {

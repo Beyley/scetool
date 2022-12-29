@@ -23,9 +23,17 @@ BUILDFOLDER = build-win64
 SHARED_TARGET = libscetool.dll
 endif
 
+ifdef CROSS_COMPILE_MAC64
+CC = zig cc -target x86_64-macos
+LDFLAGS = -static-libgcc -lstdc++ -L../prebuilt-libz/osx-x86_64/lib/ -l:libz.a
+BUILDFOLDER = build-mac64
+SHARED_TARGET = libscetool.dylib
+endif
+
 all: $(OS_TARGET) $(SHARED_TARGET)
 .PHONY: all
 
+ifndef CROSS_COMPILE_MAC64
 $(OS_TARGET): $(OBJS)
 	${LINK}
 	# Build the scetool executable
@@ -34,6 +42,7 @@ $(OS_TARGET): $(OBJS)
 	else \
 		${LINK_FAILED}; \
 	fi
+endif
 
 $(SHARED_TARGET): $(OBJS)
 	${LINK}

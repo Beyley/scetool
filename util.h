@@ -11,7 +11,9 @@
 #include "types.h"
 
 /*! Verbose. */
-extern BOOL _verbose;
+#ifndef __APPLE__
+extern 
+	BOOL _verbose;
 #define _LOG_VERBOSE(...) _IF_VERBOSE(printf("[*] " __VA_ARGS__))
 #define _IF_VERBOSE(code) \
 	do \
@@ -21,9 +23,20 @@ extern BOOL _verbose;
 			code; \
 		} \
 	} while(0)
+#else
+#define _LOG_VERBOSE(...) _IF_VERBOSE(printf("[*] " __VA_ARGS__))
+#define _IF_VERBOSE(code) \
+	do \
+	{ \
+		code; \
+	} while(0)
+#endif
+
 
 /*! Raw. */
-extern BOOL _raw;
+#ifndef __APPLE__
+extern 
+	BOOL _raw;
 #define _PRINT_RAW(fp, ...) _IF_RAW(fprintf(fp, __VA_ARGS__))
 #define _IF_RAW(code) \
 	do \
@@ -33,6 +46,14 @@ extern BOOL _raw;
 			code; \
 		} \
 	} while(0)
+#else
+#define _PRINT_RAW(fp, ...) _IF_RAW(fprintf(fp, __VA_ARGS__))
+#define _IF_RAW(code) \
+	do \
+	{ \
+		code; \
+	} while(0)
+#endif
 
 /*! ID to name entry. */
 typedef struct _id_to_name

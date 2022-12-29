@@ -3,6 +3,9 @@
 * This file is released under the GPLv2.
 */
 
+//if on macos, skip this file
+#ifndef __APPLE__
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -448,3 +451,5 @@ int main(int argc, char **argv)
 	return 0;
 }
 #endif
+
+#endif //__APPLE__
