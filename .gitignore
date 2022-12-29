@@ -1,6 +1,2 @@
-build*/
-scetool
-scetool.exe
-libscetool.so
-libscetool.dylib
-libscetool.dll
+zig-out/
+zig-cache/

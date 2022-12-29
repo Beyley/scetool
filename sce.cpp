@@ -175,7 +175,7 @@ sce_buffer_ctxt_t *sce_create_ctxt_from_buffer(u8 *scebuffer)
 			res->self.si = (section_info_t *)(res->scebuffer + res->self.selfh->section_info_offset);
 
 			//SCE version.
-			if(res->self.selfh->sce_version_offset != NULL)
+			if(res->self.selfh->sce_version_offset != 0)
 			{
 				res->self.sv = (sce_version_t *)(res->scebuffer + res->self.selfh->sce_version_offset);
 				_es_sce_version(res->self.sv);

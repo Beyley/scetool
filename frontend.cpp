@@ -22,89 +22,89 @@
 #include "frontend.h"
 
 /*! Parameters. */
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_template;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_file_type;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_compress_data;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_skip_sections;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_key_rev;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_meta_info;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_keyset;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_auth_id;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_vendor_id;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_self_type;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_app_version;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_fw_version;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_add_shdrs;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_ctrl_flags;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_cap_flags;
 #ifdef CONFIG_CUSTOM_INDIV_SEED
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_indiv_seed;
 #endif
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_license_type;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_app_type;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_content_id;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif 	
 	s8 *_real_fname;
-#ifndef __APPLE__
+#ifndef CLI_APP
 extern
 #endif
 	s8 *_add_sig;
