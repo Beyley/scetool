@@ -1,6 +1,13 @@
 scetool (C) 2011-2013 by naehrwert
 NP local license handling (C) 2012 by flatz
 
+==> Compilation <==
+Assuming all the libraries are available (run all commands from a linux host)
+ - Linux (`make`)
+ - Windows x64 (`make CROSS_COMPILE_WIN64=1`)
+ - Windows x86 (`make CROSS_COMPILE_WIN32=1`)
+ - MacOS x64 (`make CROSS_COMPILE_MAC64=1`)
+
 ==> Setup <==
  - /data/keys : Keyfile.
  - /data/ldr_curves : Loader curves (7744 bytes).
