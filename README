@@ -2,11 +2,8 @@ scetool (C) 2011-2013 by naehrwert
 NP local license handling (C) 2012 by flatz
 
 ==> Compilation <==
-Assuming all the libraries are available (run all commands from a linux host)
- - Linux (`make`)
- - Windows x64 (`make CROSS_COMPILE_WIN64=1`)
- - Windows x86 (`make CROSS_COMPILE_WIN32=1`)
- - MacOS x64 (`make CROSS_COMPILE_MAC64=1`)
+Install the latest Zig toolchain
+ - `zig build -Dtarget=[target triple] -Drelease-small=true` target triple can be things like `x86_64-windows` or `x86-macos` or `aarch64-linux` or any combination, or omit the target to build for your native platform
 
 ==> Setup <==
  - /data/keys : Keyfile.
