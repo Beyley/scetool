@@ -1,19 +1,22 @@
 const std = @import("std");
 const Self = @This();
 
-pub fn build(b: *std.build.Builder) void {
+pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
+    const mode = b.standardOptimizeOption(.{});
 
     const lib: Library = create_zlib(b, target, mode);
     lib.step.install();
     
-    const scetool: *std.build.LibExeObjStep = b.addSharedLibrary("scetool", null, .unversioned);
+    const shared_lib_options: std.build.SharedLibraryOptions = .{
+        .name = "scetool",
+        .target = target,
+        .optimize = mode,
+    };
+
+    const scetool: *std.build.LibExeObjStep = b.addSharedLibrary(shared_lib_options);
     scetool.linkSystemLibrary("c++");
     lib.link(scetool, .{});
-
-    scetool.setTarget(target);
-    scetool.setBuildMode(mode);
 
     scetool.addCSourceFiles(scetool_srcs_cpp, &.{"-std=c++11", "-fPIC"});
     scetool.addCSourceFiles(scetool_srcs_c, &.{"-std=c89", "-fPIC"});
@@ -39,14 +42,19 @@ pub const Library = struct {
         other.linkLibrary(self.step);
 
         if (opts.import_name) |import_name|
-            other.addPackagePath(import_name, package_path);
+            other.addAnonymousModule(
+                import_name,
+                .{ .source_file = .{ .path = package_path } },
+            );
     }
 };
 
-pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.Mode) Library {
-    var ret = b.addStaticLibrary("z", null);
-    ret.setTarget(target);
-    ret.setBuildMode(mode);
+pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.OptimizeMode) Library {
+    var ret = b.addStaticLibrary(.{
+        .name = "z",
+        .target = target,
+        .optimize = mode,
+    });
     ret.linkLibC();
     ret.addCSourceFiles(srcs, &.{"-std=c89", "-fPIC"});
 
