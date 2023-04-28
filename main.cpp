@@ -11,13 +11,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-// #ifdef _WIN32
-// #include <io.h>
+#ifdef _WIN32
+#include <io.h>
 // #include "getopt.h"
-// #else
-// #include <unistd.h>
+#else
+#include <unistd.h>
 // #include <getopt.h>
-// #endif
+#endif
 
 #include "types.h"
 #include "config.h"
@@ -196,7 +196,7 @@ static void print_usage()
 	printf(" -g, --np-real-fname    e.g. EBOOT.BIN        Real Filename\n");
 	printf(" -j, --np-add-sig       TRUE/FALSE(default)   Whether to add a NP sig. or not.\n");
 
-	//getchar();
+	// getchar();
 
 	exit(1);
 }
@@ -204,7 +204,7 @@ static void print_usage()
 // static void parse_args(int argc, char **argv)
 // {
 // 	char c;
-
+//
 // #ifdef CONFIG_CUSTOM_INDIV_SEED
 // 	while((c = getopt_long(argc, argv, "hki:d:e:vrt:0:1:s:2:m:K:3:4:5:A:6:7:8:9:a:b:c:f:l:g:j:", options, NULL)) != -1)
 // #else
@@ -322,9 +322,9 @@ static void print_usage()
 // 			break;
 // 		}
 // 	}
-
+//
 // 	get_args:;
-
+//
 // 	//Additional decrypt args.
 // 	if(_decrypt_file)
 // 	{
@@ -333,10 +333,10 @@ static void print_usage()
 // 			printf("[*] Error: Decrypt needs an output file!\n");
 // 			print_usage();
 // 		}
-
+//
 // 		_file_out = argv[optind];
 // 	}
-
+//
 // 	//Additional encrypt args.
 // 	if(_encrypt_file)
 // 	{
@@ -345,108 +345,95 @@ static void print_usage()
 // 			printf("[*] Error: Encrypt needs an input and output file!\n");
 // 			print_usage();
 // 		}
-
+//
 // 		_file_out = argv[optind];
 // 	}
 // }
 
-// #ifndef _DEBUG
-// int main(int argc, char **argv)
-// {
-// 	s8 *ps3 = NULL, path[256];
+export int libscetool_init()
+{
+	s8 *ps3 = NULL, path[256];
 
-// 	//Check for args.
-// 	if(argc <= 1)
-// 		print_usage();
+	print_version();
+	printf("\n");
 
-// 	//Parse them.
-// 	parse_args(argc, argv);
-	
-// 	//Only options won't suffice.
-// 	if(_got_work == FALSE)
-// 		print_usage();
+	//Try to get path from env:PS3.
+	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
+		if(access(ps3, 0) != 0)
+			ps3 = NULL;
 
-// 	print_version();
-// 	printf("\n");
+	//Load keysets.
+	if(ps3 != NULL)
+	{
+		sprintf(path, "%s/%s", ps3, CONFIG_KEYS_FILE);
+		if(access(path, 0) != 0)
+			sprintf(path, "%s/%s", CONFIG_KEYS_PATH, CONFIG_KEYS_FILE);
+	}
+	else
+		sprintf(path, "%s/%s", CONFIG_KEYS_PATH, CONFIG_KEYS_FILE);
+	if(keys_load(path) == TRUE)
+		_LOG_VERBOSE("Loaded keysets.\n");
+	else
+	{
+		if(_list_keys == TRUE)
+		{
+			printf("[*] Error: Could not load keys.\n");
+			return 0;
+		}
+		else
+			printf("[*] Warning: Could not load keys.\n");
+	}
 
-// 	//Try to get path from env:PS3.
-// 	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-// 		if(access(ps3, 0) != 0)
-// 			ps3 = NULL;
+	//Load curves.
+	if(ps3 != NULL)
+	{
+		sprintf(path, "%s/%s", ps3, CONFIG_CURVES_FILE);
+		if(access(path, 0) != 0)
+			sprintf(path, "%s/%s", CONFIG_CURVES_PATH, CONFIG_CURVES_FILE);
+	}
+	else
+		sprintf(path, "%s/%s", CONFIG_CURVES_PATH, CONFIG_CURVES_FILE);
+	if(curves_load(path) == TRUE)
+		_LOG_VERBOSE("Loaded loader curves.\n");
+	else
+		printf("[*] Warning: Could not load loader curves.\n");
 
-// 	//Load keysets.
-// 	if(ps3 != NULL)
-// 	{
-// 		sprintf(path, "%s/%s", ps3, CONFIG_KEYS_FILE);
-// 		if(access(path, 0) != 0)
-// 			sprintf(path, "%s/%s", CONFIG_KEYS_PATH, CONFIG_KEYS_FILE);
-// 	}
-// 	else
-// 		sprintf(path, "%s/%s", CONFIG_KEYS_PATH, CONFIG_KEYS_FILE);
-// 	if(keys_load(path) == TRUE)
-// 		_LOG_VERBOSE("Loaded keysets.\n");
-// 	else
-// 	{
-// 		if(_list_keys == TRUE)
-// 		{
-// 			printf("[*] Error: Could not load keys.\n");
-// 			return 0;
-// 		}
-// 		else
-// 			printf("[*] Warning: Could not load keys.\n");
-// 	}
+	//Load curves.
+	if(ps3 != NULL)
+	{
+		sprintf(path, "%s/%s", ps3, CONFIG_VSH_CURVES_FILE);
+		if(access(path, 0) != 0)
+			sprintf(path, "%s/%s", CONFIG_VSH_CURVES_PATH, CONFIG_VSH_CURVES_FILE);
+	}
+	else
+		sprintf(path, "%s/%s", CONFIG_VSH_CURVES_PATH, CONFIG_VSH_CURVES_FILE);
+	if(vsh_curves_load(path) == TRUE)
+		_LOG_VERBOSE("Loaded vsh curves.\n");
+	else
+		printf("[*] Warning: Could not load vsh curves.\n");
 
-// 	//Load curves.
-// 	if(ps3 != NULL)
-// 	{
-// 		sprintf(path, "%s/%s", ps3, CONFIG_CURVES_FILE);
-// 		if(access(path, 0) != 0)
-// 			sprintf(path, "%s/%s", CONFIG_CURVES_PATH, CONFIG_CURVES_FILE);
-// 	}
-// 	else
-// 		sprintf(path, "%s/%s", CONFIG_CURVES_PATH, CONFIG_CURVES_FILE);
-// 	if(curves_load(path) == TRUE)
-// 		_LOG_VERBOSE("Loaded loader curves.\n");
-// 	else
-// 		printf("[*] Warning: Could not load loader curves.\n");
+	//Set klicensee.
+	if(_klicensee != NULL)
+	{
+		if(strlen(_klicensee) != 0x10*2)
+		{
+			printf("[*] Error: klicensee needs to be 16 bytes.\n");
+			return FALSE;
+		}
+		np_set_klicensee(_x_to_u8_buffer(_klicensee));
+	}
 
-// 	//Load curves.
-// 	if(ps3 != NULL)
-// 	{
-// 		sprintf(path, "%s/%s", ps3, CONFIG_VSH_CURVES_FILE);
-// 		if(access(path, 0) != 0)
-// 			sprintf(path, "%s/%s", CONFIG_VSH_CURVES_PATH, CONFIG_VSH_CURVES_FILE);
-// 	}
-// 	else
-// 		sprintf(path, "%s/%s", CONFIG_VSH_CURVES_PATH, CONFIG_VSH_CURVES_FILE);
-// 	if(vsh_curves_load(path) == TRUE)
-// 		_LOG_VERBOSE("Loaded vsh curves.\n");
-// 	else
-// 		printf("[*] Warning: Could not load vsh curves.\n");
+	// if(_list_keys == TRUE)
+	// {
+	// 	printf("[*] Loaded keysets:\n");
+	// 	_print_key_list(stdout);
+	// }
+	// else if(_print_info)
+	// 	frontend_print_infos(_file_in);
+	// else if(_decrypt_file)
+	// 	frontend_decrypt(_file_in, _file_out);
+	// else if(_encrypt_file)
+	// 	frontend_encrypt(_file_in, _file_out);
 
-// 	//Set klicensee.
-// 	if(_klicensee != NULL)
-// 	{
-// 		if(strlen(_klicensee) != 0x10*2)
-// 		{
-// 			printf("[*] Error: klicensee needs to be 16 bytes.\n");
-// 			return FALSE;
-// 		}
-// 		np_set_klicensee(_x_to_u8_buffer(_klicensee));
-// 	}
-
-// 	if(_list_keys == TRUE)
-// 	{
-// 		printf("[*] Loaded keysets:\n");
-// 		_print_key_list(stdout);
-// 	}
-// 	else if(_print_info)
-// 		frontend_print_infos(_file_in);
-// 	else if(_decrypt_file)
-// 		frontend_decrypt(_file_in, _file_out);
-// 	else if(_encrypt_file)
-// 		frontend_encrypt(_file_in, _file_out);
-
-// 	return 0;
-// }
-// #endif
+	return 0;
+}
