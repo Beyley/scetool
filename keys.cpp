@@ -24,6 +24,7 @@
 #include "util.h"
 #include "tables.h"
 #include "aes.h"
+#include "files.h"
 
 /*
 [keyname]
@@ -194,7 +195,7 @@ void _print_key_list(FILE *fp)
 }
 
 #define LINEBUFSIZE 512
-BOOL keys_load(const s8 *kfile)
+BOOL keys_load(void)
 {
 	u32 i = 0, lblen;
 	FILE *fp;
@@ -204,7 +205,7 @@ BOOL keys_load(const s8 *kfile)
 	if((_keysets = list_create()) == NULL)
 		return FALSE;
 
-	if((fp = fopen(kfile, "r")) == NULL)
+	if((fp = fmemopen((void*)FILE_KEYS, strlen(FILE_KEYS), "r")) == NULL)
 	{
 		list_destroy(_keysets);
 		return FALSE;
@@ -387,21 +388,9 @@ keyset_t *keyset_find_by_name(const s8 *name)
 	return NULL;
 }
 
-BOOL curves_load(const s8 *cfile)
+BOOL curves_load(void)
 {
-	u32 len = 0;
-
-	_curves = (curve_t *)_read_buffer(cfile, &len);
-	
-	if(_curves == NULL)
-		return FALSE;
-	
-	if(len != CURVES_LENGTH)
-	{
-		free(_curves);
-		return FALSE;
-	}
-	
+	_curves = (curve_t *)FILE_LDR_CURVES;
 	return TRUE;
 }
 
@@ -412,21 +401,9 @@ curve_t *curve_find(u8 ctype)
 	return &_curves[ctype];
 }
 
-BOOL vsh_curves_load(const s8 *cfile)
+BOOL vsh_curves_load(void)
 {
-	u32 len = 0;
-
-	_vsh_curves = (vsh_curve_t *)_read_buffer(cfile, &len);
-	
-	if(_vsh_curves == NULL)
-		return FALSE;
-	
-	if(len != VSH_CURVES_LENGTH)
-	{
-		free(_vsh_curves);
-		return FALSE;
-	}
-	
+	_vsh_curves = (vsh_curve_t *)FILE_VSH_CURVES;
 	return TRUE;
 }
 

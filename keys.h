@@ -116,14 +116,14 @@ typedef struct _rif
 
 void _print_key_list(FILE *fp);
 
-BOOL keys_load(const s8 *kfile);
+BOOL keys_load(void);
 keyset_t *keyset_find(sce_buffer_ctxt_t *ctxt);
 keyset_t *keyset_find_by_name(const s8 *name);
 
-BOOL curves_load(const s8 *cfile);
+BOOL curves_load(void);
 curve_t *curve_find(u8 ctype);
 
-BOOL vsh_curves_load(const s8 *cfile);
+BOOL vsh_curves_load(void);
 curve_t *vsh_curve_find(u8 ctype);
 
 BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee);
