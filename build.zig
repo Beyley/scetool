@@ -6,8 +6,8 @@ pub fn build(b: *std.Build) void {
     const mode = b.standardOptimizeOption(.{});
 
     const lib: Library = create_zlib(b, target, mode);
-    lib.step.install();
-    
+    b.installArtifact(lib.step);
+
     const shared_lib_options: std.build.SharedLibraryOptions = .{
         .name = "scetool",
         .target = target,
@@ -18,9 +18,10 @@ pub fn build(b: *std.Build) void {
     scetool.linkSystemLibrary("c++");
     lib.link(scetool, .{});
 
-    scetool.addCSourceFiles(scetool_srcs_cpp, &.{"-std=c++11", "-fPIC"});
-    scetool.addCSourceFiles(scetool_srcs_c, &.{"-std=c89", "-fPIC"});
-    scetool.install();
+    scetool.addCSourceFiles(scetool_srcs_cpp, &.{ "-std=c++11", "-fPIC" });
+    scetool.addCSourceFiles(scetool_srcs_c, &.{ "-std=c89", "-fPIC" });
+
+    b.installArtifact(scetool);
 }
 
 fn root() []const u8 {
@@ -56,7 +57,7 @@ pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std
         .optimize = mode,
     });
     ret.linkLibC();
-    ret.addCSourceFiles(srcs, &.{"-std=c89", "-fPIC"});
+    ret.addCSourceFiles(srcs, &.{ "-std=c89", "-fPIC" });
 
     return Library{ .step = ret };
 }
@@ -97,7 +98,7 @@ const scetool_srcs_cpp = &.{
     root_path ++ "tables.cpp",
     root_path ++ "util.cpp",
     root_path ++ "spp.cpp",
-    root_path ++ "main.cpp"
+    root_path ++ "main.cpp",
 };
 
 const scetool_srcs_c = &.{
