@@ -46,6 +46,8 @@ list_t *_keysets;
 curve_t *_curves;
 /*! Loaded VSH curves. */
 vsh_curve_t *_vsh_curves;
+/*! Path to rap directory. */
+static s8* rap_path = CONFIG_RAP_PATH;
 
 static u8 rap_init_key[0x10] = 
 {
@@ -522,6 +524,10 @@ static rif_t *rif_load(const s8 *content_id)
 	return rif;
 }
 
+extern "C" void rap_set_directory(s8 *file_in) {
+	rap_path = file_in;
+}
+
 static u8 *rap_load(const s8 *content_id)
 {
 	s8 *ps3 = NULL, path[256];
@@ -536,10 +542,10 @@ static u8 *rap_load(const s8 *content_id)
 	{
 		sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RAP_FILE_EXT);
 		if(access(path, 0) != 0)
-			sprintf(path, "%s/%s%s", CONFIG_RAP_PATH, content_id, CONFIG_RAP_FILE_EXT);
+			sprintf(path, "%s/%s%s", rap_path, content_id, CONFIG_RAP_FILE_EXT);
 	}
 	else
-		sprintf(path, "%s/%s%s", CONFIG_RAP_PATH, content_id, CONFIG_RAP_FILE_EXT);
+		sprintf(path, "%s/%s%s", rap_path, content_id, CONFIG_RAP_FILE_EXT);
 
 	rap = (u8 *)_read_buffer(path, &len);
 	
