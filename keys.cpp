@@ -200,32 +200,34 @@ void _print_key_list(FILE *fp)
 BOOL keys_load(void)
 {
 	u32 i = 0, lblen;
-	FILE *fp;
 	s8 lbuf[LINEBUFSIZE];
 	keyset_t *cks = NULL;
 
 	if((_keysets = list_create()) == NULL)
 		return FALSE;
 
-	if((fp = fmemopen((void*)FILE_KEYS, strlen(FILE_KEYS), "r")) == NULL)
-	{
-		list_destroy(_keysets);
-		return FALSE;
-	}
+	const int keys_len = strlen(FILE_KEYS);
+	const char* pos = FILE_KEYS;
+	int read;
 
 	do
 	{
 		//Get next line.
 		lbuf[0] = 0;
-		fgets(lbuf, LINEBUFSIZE, fp);
+		// Read until newline or size reached
+    	for (read = 0; read < LINEBUFSIZE; read++) {
+        	if (pos[read] == '\n' || pos[read] == '\0') {
+	            break;
+        	}
+        	lbuf[read] = pos[read];
+    	}
+		lbuf[read] = '\0';
+
 		lblen = strlen(lbuf);
 
 		//Don't parse empty lines (ignore '\n') and comment lines (starting with '#').
 		if(lblen > 1 && lbuf[0] != '#')
 		{
-			//Remove '\n'.
-			lbuf[lblen-1] = 0;
-
 			//Check for keyset entry.
 			if(lblen > 2 && lbuf[0] == '[')
 			{
@@ -255,7 +257,10 @@ BOOL keys_load(void)
 				_fill_property(cks, &lbuf[0], &lbuf[i+1]);
 			}
 		}
-	} while(!feof(fp));
+
+		// Move to next line
+		pos += read + 1;
+	} while(pos - FILE_KEYS < keys_len);
 
 	//Add last keyset to keyset list.
 	if(cks != NULL)
