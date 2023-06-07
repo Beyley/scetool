@@ -15,7 +15,7 @@
 
 //if windows, we have to use __desclspec(dllexport)
 #ifdef _WIN32
-#define export __declspec(dllexport)
+#define export extern "C" __declspec(dllexport)
 #endif
 
 export void frontend_print_infos(s8 *file);
