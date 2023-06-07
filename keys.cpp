@@ -26,6 +26,9 @@
 #include "aes.h"
 #include "files.h"
 
+// for export keyword
+#include "frontend.h"
+
 /*
 [keyname]
 type={SELF, RVK, PKG, SPP, OTHER}
@@ -529,7 +532,7 @@ static rif_t *rif_load(const s8 *content_id)
 	return rif;
 }
 
-extern "C" void rap_set_directory(s8 *file_in) {
+export void rap_set_directory(s8 *file_in) {
 	rap_path = file_in;
 }
 
