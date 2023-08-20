@@ -3,23 +3,24 @@ const Self = @This();
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardOptimizeOption(.{});
+    const optimize = b.standardOptimizeOption(.{});
 
-    const lib: Library = create_zlib(b, target, mode);
-    b.installArtifact(lib.step);
+    const zlib = create_zlib(b, target, optimize);
 
     const shared_lib_options: std.build.SharedLibraryOptions = .{
         .name = "scetool",
         .target = target,
-        .optimize = mode,
+        .optimize = optimize,
     };
 
-    const scetool: *std.build.LibExeObjStep = b.addSharedLibrary(shared_lib_options);
-    scetool.linkSystemLibrary("c++");
-    lib.link(scetool, .{});
+    const scetool: *std.Build.Step.Compile = b.addSharedLibrary(shared_lib_options);
+    scetool.linkLibCpp();
+    scetool.linkLibrary(zlib);
+    scetool.addIncludePath(.{ .path = zlib_include_dir });
 
-    scetool.addCSourceFiles(scetool_srcs_cpp, &.{ "-std=c++11", "-fPIC" });
-    scetool.addCSourceFiles(scetool_srcs_c, &.{ "-std=c89", "-fPIC" });
+    scetool.addCSourceFiles(scetool_srcs, &.{});
+
+    scetool.strip = true;
 
     b.installArtifact(scetool);
 }
@@ -29,37 +30,19 @@ fn root() []const u8 {
 }
 
 const root_path = root() ++ "/";
-const package_path = root_path ++ "src/main.zig";
-pub const include_dir = root_path ++ "zlib";
-pub const Options = struct {
-    import_name: ?[]const u8 = null,
-};
 
-pub const Library = struct {
-    step: *std.build.LibExeObjStep,
+pub const zlib_include_dir = root_path ++ "zlib";
 
-    pub fn link(self: Library, other: *std.build.LibExeObjStep, opts: Options) void {
-        other.addIncludePath(include_dir);
-        other.linkLibrary(self.step);
-
-        if (opts.import_name) |import_name|
-            other.addAnonymousModule(
-                import_name,
-                .{ .source_file = .{ .path = package_path } },
-            );
-    }
-};
-
-pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, mode: std.builtin.OptimizeMode) Library {
-    var ret = b.addStaticLibrary(.{
+pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
+    var zlib = b.addStaticLibrary(.{
         .name = "z",
         .target = target,
-        .optimize = mode,
+        .optimize = optimize,
     });
-    ret.linkLibC();
-    ret.addCSourceFiles(srcs, &.{ "-std=c89", "-fPIC" });
+    zlib.linkLibC();
+    zlib.addCSourceFiles(srcs, &.{ "-std=c89", "-fPIC" });
 
-    return Library{ .step = ret };
+    return zlib;
 }
 
 const srcs = &.{
@@ -80,16 +63,14 @@ const srcs = &.{
     root_path ++ "zlib/zutil.c",
 };
 
-const scetool_srcs_cpp = &.{
+const scetool_srcs = &.{
     root_path ++ "aes_omac.cpp",
     root_path ++ "bn.cpp",
     root_path ++ "ec.cpp",
     root_path ++ "ecdsa.cpp",
     root_path ++ "frontend.cpp",
-    // root_path ++ "getopt.c",
     root_path ++ "keys.cpp",
     root_path ++ "list.cpp",
-    // root_path ++ "main.c",
     root_path ++ "mt19937.cpp",
     root_path ++ "np.cpp",
     root_path ++ "rvk.cpp",
@@ -99,9 +80,6 @@ const scetool_srcs_cpp = &.{
     root_path ++ "util.cpp",
     root_path ++ "spp.cpp",
     root_path ++ "main.cpp",
-};
-
-const scetool_srcs_c = &.{
     root_path ++ "aes.c",
     root_path ++ "sha1.c",
 };
