@@ -499,6 +499,21 @@ export void frontend_decrypt(s8 *file_in, s8 *file_out)
 		printf("[*] Error: Could not load %s\n", file_in);
 }
 
+export void set_disc_encrypt_options() {
+	/* HARDCODE ENCRYPTION CRAP FOR DISC */
+	_file_type = "SELF";
+	_skip_sections = "FALSE";
+	_key_rev = "0A";
+	_app_version = "0001000000000000";
+	_auth_id = "1010000001000003";
+	_vendor_id = "01000002";
+	_ctrl_flags = "0000000000000000000000000000000000000000000000000000000000000000";
+	_cap_flags = "00000000000000000000000000000000000000000000003B0000000100040000";
+	_self_type = "APP";
+	_fw_version = "0003005500000000";
+	_compress_data = "TRUE";
+}
+
 export void frontend_encrypt(s8 *file_in, s8 *file_out)
 {
 	BOOL can_compress = FALSE;
