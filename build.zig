@@ -71,7 +71,7 @@ pub fn build(b: *std.Build) void {
             else => @panic("unknown os, sorry"),
         };
 
-        const install_step = b.addInstallBinFile(package.getEmittedBin(), b.fmt("{s}-{s}/{s}", .{ dotnet_os, dotnet_arch, final_name }));
+        const install_step = b.addInstallBinFile(package.getEmittedBin(), b.fmt("{s}-{s}/native/{s}", .{ dotnet_os, dotnet_arch, final_name }));
         install_step.step.dependOn(&package.step);
         package_step.dependOn(&install_step.step);
     }
