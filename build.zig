@@ -18,7 +18,7 @@ pub fn build(b: *std.Build) void {
     scetool.linkLibrary(zlib);
     scetool.addIncludePath(.{ .path = zlib_include_dir });
 
-    scetool.addCSourceFiles(scetool_srcs, &.{});
+    scetool.addCSourceFiles(.{ .files = scetool_srcs });
 
     scetool.strip = true;
 
@@ -40,7 +40,7 @@ pub fn create_zlib(b: *std.build.Builder, target: std.zig.CrossTarget, optimize:
         .optimize = optimize,
     });
     zlib.linkLibC();
-    zlib.addCSourceFiles(srcs, &.{ "-std=c89", "-fPIC" });
+    zlib.addCSourceFiles(.{ .files = srcs, .flags = &.{ "-std=c89", "-fPIC" } });
 
     return zlib;
 }
