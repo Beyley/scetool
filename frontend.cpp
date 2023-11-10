@@ -363,6 +363,11 @@ static BOOL _fill_npdrm_config(self_config_t *sconf)
 
 export void frontend_print_infos(s8 *file)
 {
+#ifdef _WIN32
+	// On windows, we need to set the locale to UTF-8, since that is what C# passes to us
+	setlocale(LC_ALL, ".65001");
+#endif
+
 	u8 *buf = _read_buffer(file, NULL);
 	if (buf != NULL)
 	{
