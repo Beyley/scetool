@@ -1,8 +1,8 @@
 /*
-* Copyright (c) 2011-2013 by naehrwert
-* Copyright (c) 2012 by flatz
-* This file is released under the GPLv2.
-*/
+ * Copyright (c) 2011-2013 by naehrwert
+ * Copyright (c) 2012 by flatz
+ * This file is released under the GPLv2.
+ */
 
 #include <stdlib.h>
 
@@ -21,7 +21,7 @@
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
-#include "Windows.h"
+#include "windows.h"
 #endif
 
 /*! klicensee key. */
@@ -29,16 +29,16 @@ static u8 *_klicensee_key;
 
 static ci_data_npdrm_t *_sce_find_ci_npdrm(sce_buffer_ctxt_t *ctxt)
 {
-	if(ctxt->self.cis != NULL)
+	if (ctxt->self.cis != NULL)
 	{
 		LIST_FOREACH(iter, ctxt->self.cis)
 		{
 			control_info_t *ci = (control_info_t *)iter->value;
 
-			if(ci->type == CONTROL_INFO_TYPE_NPDRM)
+			if (ci->type == CONTROL_INFO_TYPE_NPDRM)
 			{
 				ci_data_npdrm_t *np = (ci_data_npdrm_t *)((u8 *)ci + sizeof(control_info_t));
-				//Fixup.
+				// Fixup.
 				_es_ci_data_npdrm(np);
 				return np;
 			}
@@ -61,23 +61,23 @@ BOOL np_decrypt_npdrm(sce_buffer_ctxt_t *ctxt)
 	u8 npdrm_iv[0x10];
 	ci_data_npdrm_t *np;
 
-	if((np = _sce_find_ci_npdrm(ctxt)) == NULL)
+	if ((np = _sce_find_ci_npdrm(ctxt)) == NULL)
 		return FALSE;
 
-	//Try to find keysets.
+	// Try to find keysets.
 	ks_klic_key = keyset_find_by_name(CONFIG_NP_KLIC_KEY_KNAME);
-	if(ks_klic_key == NULL)
+	if (ks_klic_key == NULL)
 		return FALSE;
-	if(_klicensee_key != NULL)
+	if (_klicensee_key != NULL)
 		memcpy(npdrm_key, _klicensee_key, 0x10);
-	else if(np->license_type == NP_LICENSE_FREE)
+	else if (np->license_type == NP_LICENSE_FREE)
 	{
 		ks_np_klic_free = keyset_find_by_name(CONFIG_NP_KLIC_FREE_KNAME);
-		if(ks_np_klic_free == NULL)
+		if (ks_np_klic_free == NULL)
 			return FALSE;
 		memcpy(npdrm_key, ks_np_klic_free->erk, 0x10);
 	}
-	else if(np->license_type == NP_LICENSE_LOCAL)
+	else if (np->license_type == NP_LICENSE_LOCAL)
 	{
 		if ((klicensee_by_content_id((s8 *)np->content_id, npdrm_key)) == FALSE)
 			return FALSE;
@@ -103,23 +103,23 @@ BOOL np_encrypt_npdrm(sce_buffer_ctxt_t *ctxt)
 	u8 npdrm_iv[0x10];
 	ci_data_npdrm_t *np;
 
-	if((np = _sce_find_ci_npdrm(ctxt)) == NULL)
+	if ((np = _sce_find_ci_npdrm(ctxt)) == NULL)
 		return FALSE;
 
-	//Try to find keysets.
+	// Try to find keysets.
 	ks_klic_key = keyset_find_by_name(CONFIG_NP_KLIC_KEY_KNAME);
-	if(ks_klic_key == NULL)
+	if (ks_klic_key == NULL)
 		return FALSE;
-	if(_klicensee_key != NULL)
+	if (_klicensee_key != NULL)
 		memcpy(npdrm_key, _klicensee_key, 0x10);
-	else if(np->license_type == NP_LICENSE_FREE)
+	else if (np->license_type == NP_LICENSE_FREE)
 	{
 		ks_np_klic_free = keyset_find_by_name(CONFIG_NP_KLIC_FREE_KNAME);
-		if(ks_np_klic_free == NULL)
+		if (ks_np_klic_free == NULL)
 			return FALSE;
 		memcpy(npdrm_key, ks_np_klic_free->erk, 0x10);
 	}
-	else if(np->license_type == NP_LICENSE_LOCAL)
+	else if (np->license_type == NP_LICENSE_LOCAL)
 	{
 		if ((klicensee_by_content_id((s8 *)np->content_id, npdrm_key)) == FALSE)
 			return FALSE;
@@ -144,23 +144,23 @@ BOOL np_create_ci(npdrm_config_t *npconf, ci_data_npdrm_t *cinp)
 	keyset_t *ks_np_tid, *ks_np_ci, *ks_np_klic_free;
 	u8 npdrm_key[0x10];
 
-	//Try to find keysets.
+	// Try to find keysets.
 	ks_np_tid = keyset_find_by_name(CONFIG_NP_TID_KNAME);
 	ks_np_ci = keyset_find_by_name(CONFIG_NP_CI_KNAME);
-	if(ks_np_tid == NULL || ks_np_ci == NULL)
+	if (ks_np_tid == NULL || ks_np_ci == NULL)
 		return FALSE;
 
-	//Can only create NPDRM SELF with local and free license.
-	if(_klicensee_key != NULL)
+	// Can only create NPDRM SELF with local and free license.
+	if (_klicensee_key != NULL)
 		memcpy(npdrm_key, _klicensee_key, 0x10);
-	else if(npconf->license_type == NP_LICENSE_FREE)
+	else if (npconf->license_type == NP_LICENSE_FREE)
 	{
 		ks_np_klic_free = keyset_find_by_name(CONFIG_NP_KLIC_FREE_KNAME);
-		if(ks_np_klic_free == NULL)
+		if (ks_np_klic_free == NULL)
 			return FALSE;
 		memcpy(npdrm_key, ks_np_klic_free->erk, 0x10);
 	}
-	else if(npconf->license_type == NP_LICENSE_LOCAL)
+	else if (npconf->license_type == NP_LICENSE_LOCAL)
 	{
 		if ((klicensee_by_content_id((s8 *)npconf->content_id, npdrm_key)) == FALSE)
 			return FALSE;
@@ -173,43 +173,42 @@ BOOL np_create_ci(npdrm_config_t *npconf, ci_data_npdrm_t *cinp)
 	cinp->license_type = npconf->license_type;
 	cinp->app_type = npconf->app_type;
 	memcpy(cinp->content_id, npconf->content_id, 0x30);
-	#ifdef CONFIG_PRIVATE_BUILD
-		_fill_rand_bytes(cinp->rndpad, 0x10);
-	#else
-		//Better than boring random bytes!
-		memcpy(cinp->rndpad, CONFIG_NPDRM_WATERMARK, 0x10);
-	#endif
+#ifdef CONFIG_PRIVATE_BUILD
+	_fill_rand_bytes(cinp->rndpad, 0x10);
+#else
+	// Better than boring random bytes!
+	memcpy(cinp->rndpad, CONFIG_NPDRM_WATERMARK, 0x10);
+#endif
 	cinp->unknown_1 = 0;
 	cinp->unknown_2 = 0;
 
-	//Fixup before hashing.
+	// Fixup before hashing.
 	_es_ci_data_npdrm(cinp);
 
-	//Generate control info hash key.
-	for(i = 0; i < 0x10; i++)
+	// Generate control info hash key.
+	for (i = 0; i < 0x10; i++)
 		ci_key[i] = ks_np_ci->erk[i] ^ npdrm_key[i];
 
-	//Create hash of title id and real filename.
+	// Create hash of title id and real filename.
 	len = strlen(npconf->real_fname) + 0x30;
 	cid_fname = (u8 *)malloc(sizeof(u8) * (len + 1));
 	memcpy(cid_fname, cinp->content_id, 0x30);
 	strcpy((s8 *)(cid_fname + 0x30), npconf->real_fname);
 	aes_omac1(cinp->hash_cid_fname, cid_fname, len, ks_np_tid->erk, KEYBITS(0x10));
 
-	//Create control info hash.
-	aes_omac1(cinp->hash_ci, (u8 *)cinp, 0x60 /* Only the first 0x60 bytes are hashed. */ , ci_key, KEYBITS(0x10));
+	// Create control info hash.
+	aes_omac1(cinp->hash_ci, (u8 *)cinp, 0x60 /* Only the first 0x60 bytes are hashed. */, ci_key, KEYBITS(0x10));
 
 	return TRUE;
 }
 
-//TODO: The fwrite/fread error checking was broken.
-//Maybe the MS runtime is returning the number of bytes written instead of the element count?
+// TODO: The fwrite/fread error checking was broken.
+// Maybe the MS runtime is returning the number of bytes written instead of the element count?
 BOOL np_sign_file(s8 *fname)
 {
-	u8 padding_data[0x10] = 
-	{
-		0xbc, 0x3f, 0x7a, 0x48, 0xaf, 0x45, 0xef, 0x28, 0x3a, 0x05, 0x98, 0x10, 0xbc, 0x3f, 0x7a, 0x48
-	};
+	u8 padding_data[0x10] =
+		{
+			0xbc, 0x3f, 0x7a, 0x48, 0xaf, 0x45, 0xef, 0x28, 0x3a, 0x05, 0x98, 0x10, 0xbc, 0x3f, 0x7a, 0x48};
 
 	keyset_t *ks;
 	FILE *fp = NULL;
@@ -218,18 +217,18 @@ BOOL np_sign_file(s8 *fname)
 	u32 padding;
 	u8 hash[0x14], R[0x15], S[0x15];
 
-	//Try to find keyset.
-	if((ks = keyset_find_by_name(CONFIG_NP_SIG_KNAME)) == NULL)
+	// Try to find keyset.
+	if ((ks = keyset_find_by_name(CONFIG_NP_SIG_KNAME)) == NULL)
 		return FALSE;
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, fname, -1, NULL, 0);
-	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
 	MultiByteToWideChar(CP_UTF8, 0, fname, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"r+b")) == NULL)
 		return FALSE;
-	
+
 	free(fileWideStr);
 #else
 	if ((fp = fopen(fname, "r+b")) == NULL)
@@ -240,24 +239,24 @@ BOOL np_sign_file(s8 *fname)
 	length = ftell(fp);
 
 	padding = length % 0x10;
-	if(padding > 0)
+	if (padding > 0)
 	{
 		fwrite(padding_data, sizeof(u8), padding, fp);
 		length += padding;
 	}
 
 	fseek(fp, 0, SEEK_SET);
-	if((buffer = (u8 *)malloc(length)) == NULL)
+	if ((buffer = (u8 *)malloc(length)) == NULL)
 	{
 		fclose(fp);
 		return FALSE;
 	}
 	fread(buffer, sizeof(u8), length, fp);
 
-	//Generate header hash.
+	// Generate header hash.
 	sha1(buffer, length, hash);
 
-	//Generate signature.
+	// Generate signature.
 	/* TODO: Set the right curve and private key */
 	ecdsa_set_curve(ks->ctype | USE_VSH_CURVE);
 	ecdsa_set_pub(ks->pub);

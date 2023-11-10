@@ -1,8 +1,8 @@
 /*
-* Copyright (c) 2011-2013 by naehrwert
-* Copyright (c) 2011-2012 by Youness Alaoui <kakaroto@kakaroto.homelinux.net>
-* This file is released under the GPLv2.
-*/
+ * Copyright (c) 2011-2013 by naehrwert
+ * Copyright (c) 2011-2012 by Youness Alaoui <kakaroto@kakaroto.homelinux.net>
+ * This file is released under the GPLv2.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -25,7 +25,7 @@
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
-#include "Windows.h"
+#include "windows.h"
 #endif
 
 void _print_sce_header(FILE *fp, sce_header_t *h)
@@ -36,14 +36,14 @@ void _print_sce_header(FILE *fp, sce_header_t *h)
 	fprintf(fp, "[*] SCE Header:\n");
 	fprintf(fp, " Magic           0x%08X [%s]\n", h->magic, (h->magic == SCE_HEADER_MAGIC ? "OK" : "ERROR"));
 	fprintf(fp, " Version         0x%08X\n", h->version);
-	
-	if(h->key_revision == KEY_REVISION_DEBUG)
+
+	if (h->key_revision == KEY_REVISION_DEBUG)
 		fprintf(fp, " Key Revision    [DEBUG]\n");
 	else
 		fprintf(fp, " Key Revision    0x%04X\n", h->key_revision);
-	
+
 	name = _get_name(_sce_header_types, h->header_type);
-	if(name != NULL)
+	if (name != NULL)
 		fprintf(fp, " Header Type     [%s]\n", name);
 	else
 		fprintf(fp, " Header Type     0x%04X\n", h->header_type);
@@ -80,20 +80,20 @@ static void _print_metadata_section_header_header(FILE *fp)
 
 void _print_metadata_section_header(FILE *fp, metadata_section_header_t *msh, u32 idx)
 {
-	fprintf(fp, " %03d %08llX %08llX %02X   %02X    ", 
-		idx, msh->data_offset, msh->data_size, msh->type, msh->index);
+	fprintf(fp, " %03d %08llX %08llX %02X   %02X    ",
+			idx, msh->data_offset, msh->data_size, msh->type, msh->index);
 
-	if(msh->hashed == METADATA_SECTION_HASHED)
+	if (msh->hashed == METADATA_SECTION_HASHED)
 		fprintf(fp, "[YES]  %02X   ", msh->sha1_index);
 	else
 		fprintf(fp, "[NO ]  --   ");
 
-	if(msh->encrypted == METADATA_SECTION_ENCRYPTED)
+	if (msh->encrypted == METADATA_SECTION_ENCRYPTED)
 		fprintf(fp, "[YES]     %02X  %02X ", msh->key_index, msh->iv_index);
 	else
 		fprintf(fp, "[NO ]     --  -- ");
 
-	if(msh->compressed == METADATA_SECTION_COMPRESSED)
+	if (msh->compressed == METADATA_SECTION_COMPRESSED)
 		fprintf(fp, "[YES]\n");
 	else
 		fprintf(fp, "[NO ]\n");
@@ -103,14 +103,14 @@ void _print_sce_file_keys(FILE *fp, sce_buffer_ctxt_t *ctxt)
 {
 	u32 i;
 
-	//Get start of keys.
+	// Get start of keys.
 	u8 *keys = (u8 *)ctxt->metash + sizeof(metadata_section_header_t) * ctxt->metah->section_count;
 
 	fprintf(fp, "[*] SCE File Keys:\n");
-	for(i = 0; i < ctxt->metah->key_count; i++)
+	for (i = 0; i < ctxt->metah->key_count; i++)
 	{
 		fprintf(fp, " %02X:", i);
-		_hexdump(fp, "", i, keys+i*0x10, 0x10, FALSE);
+		_hexdump(fp, "", i, keys + i * 0x10, 0x10, FALSE);
 	}
 }
 
@@ -118,7 +118,7 @@ static sce_buffer_ctxt_t *_sce_create_ctxt()
 {
 	sce_buffer_ctxt_t *res;
 
-	if((res = (sce_buffer_ctxt_t *)malloc(sizeof(sce_buffer_ctxt_t))) == NULL)
+	if ((res = (sce_buffer_ctxt_t *)malloc(sizeof(sce_buffer_ctxt_t))) == NULL)
 		return NULL;
 
 	memset(res, 0, sizeof(sce_buffer_ctxt_t));
@@ -126,20 +126,20 @@ static sce_buffer_ctxt_t *_sce_create_ctxt()
 	res->scebuffer = NULL;
 	res->mdec = TRUE;
 
-	//Allocate SCE header.
+	// Allocate SCE header.
 	res->sceh = (sce_header_t *)malloc(sizeof(sce_header_t));
 	memset(res->sceh, 0, sizeof(sce_header_t));
 
-	//Allocate metadata info (with random key/iv).
+	// Allocate metadata info (with random key/iv).
 	res->metai = (metadata_info_t *)malloc(sizeof(metadata_info_t));
 	_fill_rand_bytes(res->metai->key, 0x10);
 	memset(res->metai->key_pad, 0, 0x10);
 	_fill_rand_bytes(res->metai->iv, 0x10);
 	memset(res->metai->iv_pad, 0, 0x10);
-	//Allocate metadata header.
+	// Allocate metadata header.
 	res->metah = (metadata_header_t *)malloc(sizeof(metadata_header_t));
-	//memset(res->metah, 0, sizeof(metadata_header_t));
-	//Allocate signature.
+	// memset(res->metah, 0, sizeof(metadata_header_t));
+	// Allocate signature.
 	res->sig = (signature_t *)malloc(sizeof(signature_t));
 
 	res->makeself = NULL;
@@ -151,7 +151,7 @@ sce_buffer_ctxt_t *sce_create_ctxt_from_buffer(u8 *scebuffer)
 {
 	sce_buffer_ctxt_t *res;
 
-	if((res = (sce_buffer_ctxt_t *)malloc(sizeof(sce_buffer_ctxt_t))) == NULL)
+	if ((res = (sce_buffer_ctxt_t *)malloc(sizeof(sce_buffer_ctxt_t))) == NULL)
 		return NULL;
 
 	memset(res, 0, sizeof(sce_buffer_ctxt_t));
@@ -159,63 +159,63 @@ sce_buffer_ctxt_t *sce_create_ctxt_from_buffer(u8 *scebuffer)
 	res->scebuffer = scebuffer;
 	res->mdec = FALSE;
 
-	//Set pointer to SCE header.
+	// Set pointer to SCE header.
 	res->sceh = (sce_header_t *)scebuffer;
 	_es_sce_header(res->sceh);
 
-	//Set pointers to file type specific headers.
-	switch(res->sceh->header_type)
+	// Set pointers to file type specific headers.
+	switch (res->sceh->header_type)
 	{
-		case SCE_HEADER_TYPE_SELF:
+	case SCE_HEADER_TYPE_SELF:
+	{
+		// SELF header.
+		res->self.selfh = (self_header_t *)(res->scebuffer + sizeof(sce_header_t));
+		_es_self_header(res->self.selfh);
+
+		// Application info.
+		res->self.ai = (app_info_t *)(res->scebuffer + res->self.selfh->app_info_offset);
+		_es_app_info(res->self.ai);
+
+		// Section infos.
+		res->self.si = (section_info_t *)(res->scebuffer + res->self.selfh->section_info_offset);
+
+		// SCE version.
+		if (res->self.selfh->sce_version_offset != 0)
 		{
-			//SELF header.
-			res->self.selfh = (self_header_t *)(res->scebuffer + sizeof(sce_header_t));
-			_es_self_header(res->self.selfh);
-
-			//Application info.
-			res->self.ai = (app_info_t *)(res->scebuffer + res->self.selfh->app_info_offset);
-			_es_app_info(res->self.ai);
-
-			//Section infos.
-			res->self.si = (section_info_t *)(res->scebuffer + res->self.selfh->section_info_offset);
-
-			//SCE version.
-			if(res->self.selfh->sce_version_offset != 0)
-			{
-				res->self.sv = (sce_version_t *)(res->scebuffer + res->self.selfh->sce_version_offset);
-				_es_sce_version(res->self.sv);
-			}
-			else
-				res->self.sv = 0;
-
-			//Get pointers to all control infos.
-			u32 len = (u32)res->self.selfh->control_info_size;
-			if(len > 0)
-			{
-				u8 *ptr = res->scebuffer + res->self.selfh->control_info_offset;
-				res->self.cis = list_create();
-
-				while(len > 0)
-				{
-					control_info_t *tci = (control_info_t *)ptr;
-					_es_control_info(tci);
-					ptr += tci->size;
-					len -= tci->size;
-					list_add_back(res->self.cis, tci);
-				}
-			}
-			else
-				res->self.cis = NULL;
+			res->self.sv = (sce_version_t *)(res->scebuffer + res->self.selfh->sce_version_offset);
+			_es_sce_version(res->self.sv);
 		}
-		break;
+		else
+			res->self.sv = 0;
+
+		// Get pointers to all control infos.
+		u32 len = (u32)res->self.selfh->control_info_size;
+		if (len > 0)
+		{
+			u8 *ptr = res->scebuffer + res->self.selfh->control_info_offset;
+			res->self.cis = list_create();
+
+			while (len > 0)
+			{
+				control_info_t *tci = (control_info_t *)ptr;
+				_es_control_info(tci);
+				ptr += tci->size;
+				len -= tci->size;
+				list_add_back(res->self.cis, tci);
+			}
+		}
+		else
+			res->self.cis = NULL;
+	}
+	break;
 	case SCE_HEADER_TYPE_RVK:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_PKG:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_SPP:
-		//TODO
+		// TODO
 		break;
 	default:
 		free(res);
@@ -223,7 +223,7 @@ sce_buffer_ctxt_t *sce_create_ctxt_from_buffer(u8 *scebuffer)
 		break;
 	}
 
-	//Set pointers to metadata headers.
+	// Set pointers to metadata headers.
 	res->metai = (metadata_info_t *)(scebuffer + sizeof(sce_header_t) + res->sceh->metadata_offset);
 	res->metah = (metadata_header_t *)((u8 *)res->metai + sizeof(metadata_info_t));
 	res->metash = (metadata_section_header_t *)((u8 *)res->metah + sizeof(metadata_header_t));
@@ -235,35 +235,35 @@ sce_buffer_ctxt_t *sce_create_ctxt_build_self(u8 *elf, u32 elf_len)
 {
 	sce_buffer_ctxt_t *res;
 
-	if((res = _sce_create_ctxt()) == NULL)
+	if ((res = _sce_create_ctxt()) == NULL)
 		return NULL;
 
 	res->sceh->magic = SCE_HEADER_MAGIC;
 	res->sceh->version = SCE_HEADER_VERSION_2;
 	res->sceh->header_type = SCE_HEADER_TYPE_SELF;
 
-	//Allocate SELF header.
+	// Allocate SELF header.
 	res->self.selfh = (self_header_t *)malloc(sizeof(self_header_t));
 	memset(res->self.selfh, 0, sizeof(self_header_t));
 	res->self.selfh->header_type = SUB_HEADER_TYPE_SELF;
-	//Allocate application info.
+	// Allocate application info.
 	res->self.ai = (app_info_t *)malloc(sizeof(app_info_t));
 	memset(res->self.ai, 0, sizeof(app_info_t));
-	//SCE version.
+	// SCE version.
 	res->self.sv = (sce_version_t *)malloc(sizeof(sce_version_t));
-	//Create control info list.
+	// Create control info list.
 	res->self.cis = list_create();
-	//Create optional headers list.
+	// Create optional headers list.
 	res->self.ohs = list_create();
 
-	//Makeself context.
+	// Makeself context.
 	res->makeself = (makeself_ctxt_t *)malloc(sizeof(makeself_ctxt_t));
 	memset(res->makeself, 0, sizeof(makeself_ctxt_t));
-	//ELF buffer.
+	// ELF buffer.
 	res->makeself->elf = elf;
 	res->makeself->elf_len = elf_len;
 
-	//Section list.
+	// Section list.
 	res->secs = list_create();
 
 	return res;
@@ -281,7 +281,8 @@ void sce_add_data_section(sce_buffer_ctxt_t *ctxt, void *buffer, u32 size, BOOL 
 void sce_set_metash(sce_buffer_ctxt_t *ctxt, u32 type, BOOL encrypted, u32 idx)
 {
 	ctxt->metash[idx].type = type;
-	ctxt->metash[idx].index = (type == METADATA_SECTION_TYPE_PHDR ? idx : type == METADATA_SECTION_TYPE_SHDR ? idx + 1 : idx);
+	ctxt->metash[idx].index = (type == METADATA_SECTION_TYPE_PHDR ? idx : type == METADATA_SECTION_TYPE_SHDR ? idx + 1
+																											 : idx);
 	ctxt->metash[idx].hashed = METADATA_SECTION_HASHED;
 	ctxt->metash[idx].encrypted = (encrypted == TRUE ? METADATA_SECTION_ENCRYPTED : METADATA_SECTION_NOT_ENCRYPTED);
 	ctxt->metash[idx].compressed = METADATA_SECTION_NOT_COMPRESSED;
@@ -295,31 +296,31 @@ void sce_compress_data(sce_buffer_ctxt_t *ctxt)
 	LIST_FOREACH(iter, ctxt->secs)
 	{
 		sce_section_ctxt_t *sec = (sce_section_ctxt_t *)iter->value;
-		
-		//Check if the section may be compressed.
-		if(sec->may_compr == TRUE)
+
+		// Check if the section may be compressed.
+		if (sec->may_compr == TRUE)
 		{
-			if(sec->size > 0)
+			if (sec->size > 0)
 			{
 				size_comp = size_bound = compressBound(sec->size);
 				u8 *buf = (u8 *)malloc(sizeof(u8) * size_bound);
 				compress(buf, &size_comp, (const u8 *)sec->buffer, sec->size);
 
-				if(size_comp < sec->size)
+				if (size_comp < sec->size)
 				{
-					//Set compressed buffer and size.
+					// Set compressed buffer and size.
 					sec->buffer = buf;
 					sec->size = size_comp;
 
-					//Set compression in section info.
-					if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && i < ctxt->makeself->si_sec_cnt)
+					// Set compression in section info.
+					if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && i < ctxt->makeself->si_sec_cnt)
 					{
 						ctxt->self.si[i].compressed = SECTION_INFO_COMPRESSED;
-						//Update size too.
+						// Update size too.
 						ctxt->self.si[i].size = size_comp;
 					}
 
-					//Set compression in maetadata section header.
+					// Set compression in maetadata section header.
 					ctxt->metash[i].compressed = METADATA_SECTION_COMPRESSED;
 				}
 				else
@@ -341,7 +342,7 @@ static u32 _sce_get_ci_len(sce_buffer_ctxt_t *ctxt)
 	u32 res = 0;
 
 	LIST_FOREACH(iter, ctxt->self.cis)
-		res += ((control_info_t *)iter->value)->size;
+	res += ((control_info_t *)iter->value)->size;
 
 	return res;
 }
@@ -351,7 +352,7 @@ static u32 _sce_get_oh_len(sce_buffer_ctxt_t *ctxt)
 	u32 res = 0;
 
 	LIST_FOREACH(iter, ctxt->self.ohs)
-		res += ((opt_header_t *)iter->value)->size;
+	res += ((opt_header_t *)iter->value)->size;
 
 	return res;
 }
@@ -360,29 +361,29 @@ void _sce_fixup_ctxt(sce_buffer_ctxt_t *ctxt)
 {
 	u32 i = 0, base_off, last_off;
 
-	//Set section info data.
+	// Set section info data.
 	base_off = ctxt->sceh->header_len;
 	LIST_FOREACH(iter, ctxt->secs)
 	{
-		//Save last offset.
+		// Save last offset.
 		last_off = base_off;
 
-		//Section offsets.
+		// Section offsets.
 		sce_section_ctxt_t *sec = (sce_section_ctxt_t *)iter->value;
 		sec->offset = base_off;
 
-		//Section infos for SELF (that are present as data sections).
-		if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && i < ctxt->makeself->si_sec_cnt)
-		//{
+		// Section infos for SELF (that are present as data sections).
+		if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && i < ctxt->makeself->si_sec_cnt)
+			//{
 			ctxt->self.si[i].offset = base_off;
 		//	ctxt->self.si[i].size = sec->size;
 		//}
 
-		//Metadata section headers.
+		// Metadata section headers.
 		ctxt->metash[i].data_offset = base_off;
 		ctxt->metash[i].data_size = sec->size;
 
-		//Update offset and data length.
+		// Update offset and data length.
 		base_off += sec->size;
 		ctxt->sceh->data_len = base_off - ctxt->sceh->header_len;
 		base_off = ALIGN(base_off, SCE_ALIGN);
@@ -390,47 +391,47 @@ void _sce_fixup_ctxt(sce_buffer_ctxt_t *ctxt)
 		i++;
 	}
 
-	//Set metadata offset (counted from after SCE header).
+	// Set metadata offset (counted from after SCE header).
 	ctxt->sceh->metadata_offset = ctxt->off_metai - sizeof(sce_header_t);
 
-	//Set metadata header values.
+	// Set metadata header values.
 	ctxt->metah->sig_input_length = ctxt->off_sig;
 	ctxt->metah->unknown_0 = 1;
 	ctxt->metah->opt_header_size = _sce_get_oh_len(ctxt);
 	ctxt->metah->unknown_1 = 0;
 	ctxt->metah->unknown_2 = 0;
 
-	switch(ctxt->sceh->header_type)
+	switch (ctxt->sceh->header_type)
 	{
 	case SCE_HEADER_TYPE_SELF:
-		{
-			//Set header offsets.
-			ctxt->self.selfh->app_info_offset = ctxt->off_self.off_ai;
-			ctxt->self.selfh->elf_offset = ctxt->off_self.off_ehdr;
-			ctxt->self.selfh->phdr_offset = ctxt->off_self.off_phdr;
-			ctxt->self.selfh->section_info_offset = ctxt->off_self.off_si;
-			ctxt->self.selfh->sce_version_offset = ctxt->off_self.off_sv;
-			ctxt->self.selfh->control_info_offset = ctxt->off_self.off_cis;
-			ctxt->self.selfh->control_info_size = _sce_get_ci_len(ctxt);
+	{
+		// Set header offsets.
+		ctxt->self.selfh->app_info_offset = ctxt->off_self.off_ai;
+		ctxt->self.selfh->elf_offset = ctxt->off_self.off_ehdr;
+		ctxt->self.selfh->phdr_offset = ctxt->off_self.off_phdr;
+		ctxt->self.selfh->section_info_offset = ctxt->off_self.off_si;
+		ctxt->self.selfh->sce_version_offset = ctxt->off_self.off_sv;
+		ctxt->self.selfh->control_info_offset = ctxt->off_self.off_cis;
+		ctxt->self.selfh->control_info_size = _sce_get_ci_len(ctxt);
 
-			//Set section headers offset in SELF header (last data section) if available.
-			if(ctxt->makeself->shdrs != NULL)
-				ctxt->self.selfh->shdr_offset = last_off;
-			else
-				ctxt->self.selfh->shdr_offset = 0;
-		}
-		break;
+		// Set section headers offset in SELF header (last data section) if available.
+		if (ctxt->makeself->shdrs != NULL)
+			ctxt->self.selfh->shdr_offset = last_off;
+		else
+			ctxt->self.selfh->shdr_offset = 0;
+	}
+	break;
 	case SCE_HEADER_TYPE_RVK:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_PKG:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_SPP:
-		//TODO
+		// TODO
 		break;
 	default:
-		//TODO
+		// TODO
 		break;
 	}
 }
@@ -439,14 +440,14 @@ void _sce_fixup_keys(sce_buffer_ctxt_t *ctxt)
 {
 	u32 i;
 
-	//Build keys array.
+	// Build keys array.
 	ctxt->keys_len = 0;
 	ctxt->metah->key_count = 0;
-	for(i = 0; i < ctxt->metah->section_count; i++)
+	for (i = 0; i < ctxt->metah->section_count; i++)
 	{
-		if(ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
+		if (ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
 		{
-			ctxt->keys_len += 0x80; //0x60 HMAC, 0x20 key/iv
+			ctxt->keys_len += 0x80; // 0x60 HMAC, 0x20 key/iv
 			ctxt->metah->key_count += 8;
 			ctxt->metash[i].sha1_index = ctxt->metah->key_count - 8;
 			ctxt->metash[i].key_index = ctxt->metah->key_count - 2;
@@ -454,7 +455,7 @@ void _sce_fixup_keys(sce_buffer_ctxt_t *ctxt)
 		}
 		else
 		{
-			ctxt->keys_len += 0x60; //0x60 HMAC
+			ctxt->keys_len += 0x60; // 0x60 HMAC
 			ctxt->metah->key_count += 6;
 			ctxt->metash[i].sha1_index = ctxt->metah->key_count - 6;
 			ctxt->metash[i].key_index = 0xFFFFFFFF;
@@ -462,22 +463,22 @@ void _sce_fixup_keys(sce_buffer_ctxt_t *ctxt)
 		}
 	}
 
-	//Allocate and fill keys array.
+	// Allocate and fill keys array.
 	ctxt->keys = (u8 *)malloc(sizeof(u8) * ctxt->keys_len);
 	_fill_rand_bytes(ctxt->keys, ctxt->keys_len);
 
 #ifndef CONFIG_PRIVATE_BUILD
 	time_t rawtime;
 	struct tm *ti;
-	s8 buf[16+1];
+	s8 buf[16 + 1];
 
 	time(&rawtime);
 	ti = localtime(&rawtime);
-	sprintf(buf, "%02d%02d%02d::%02d%02d%04d", 
-		ti->tm_hour, ti->tm_min, ti->tm_sec, 
-		ti->tm_mday, ti->tm_mon, ti->tm_year+1900);
+	sprintf(buf, "%02d%02d%02d::%02d%02d%04d",
+			ti->tm_hour, ti->tm_min, ti->tm_sec,
+			ti->tm_mday, ti->tm_mon, ti->tm_year + 1900);
 
-	memcpy(ctxt->keys + 0x20, "SURPRIZE :D "/**/, 12);
+	memcpy(ctxt->keys + 0x20, "SURPRIZE :D " /**/, 12);
 	memcpy(ctxt->keys + 0x30, "IM IN UR KEYZ !!", 16);
 	u8 foo[16] = {0x09, 0xB8, 0xBE, 0xAE, 0x83, 0xC0, 0x17, 0xA6, 0x3B, 0x11, 0xB0, 0x50, 0xC4, 0xCE, 0xED, 0xF9};
 	memcpy(ctxt->keys + 0x40, foo, 16);
@@ -486,82 +487,84 @@ void _sce_fixup_keys(sce_buffer_ctxt_t *ctxt)
 }
 
 /*! Increase offset and align it. */
-#define _INC_OFF_TYPE(off, type) off; \
-	off += sizeof(type); \
+#define _INC_OFF_TYPE(off, type) \
+	off;                         \
+	off += sizeof(type);         \
 	off = ALIGN(off, SCE_ALIGN)
-#define _INC_OFF_SIZE(off, size) off; \
-	off += (size); \
+#define _INC_OFF_SIZE(off, size) \
+	off;                         \
+	off += (size);               \
 	off = ALIGN(off, SCE_ALIGN)
 
 void sce_layout_ctxt(sce_buffer_ctxt_t *ctxt)
 {
 	u32 coff = 0;
 
-	//SCE header.
+	// SCE header.
 	ctxt->off_sceh = _INC_OFF_TYPE(coff, sce_header_t);
 
-	switch(ctxt->sceh->header_type)
+	switch (ctxt->sceh->header_type)
 	{
 	case SCE_HEADER_TYPE_SELF:
-		{
-			//SELF header.
-			ctxt->off_self.off_selfh = _INC_OFF_TYPE(coff, self_header_t);
-			//Application info.
-			ctxt->off_self.off_ai = _INC_OFF_TYPE(coff, app_info_t);
-			//ELF header.
-			ctxt->off_self.off_ehdr = _INC_OFF_SIZE(coff, ctxt->makeself->ehsize);
-			//ELF Program headers.
-			ctxt->off_self.off_phdr = _INC_OFF_SIZE(coff, ctxt->makeself->phsize);
-			//Section info.
-			ctxt->off_self.off_si = _INC_OFF_SIZE(coff, sizeof(section_info_t) * ctxt->makeself->si_cnt);
-			//SCE version.
-			ctxt->off_self.off_sv = _INC_OFF_TYPE(coff, sce_version_t);
-			//Control infos.
-			ctxt->off_self.off_cis = _INC_OFF_SIZE(coff, _sce_get_ci_len(ctxt));
-		}
-		break;
+	{
+		// SELF header.
+		ctxt->off_self.off_selfh = _INC_OFF_TYPE(coff, self_header_t);
+		// Application info.
+		ctxt->off_self.off_ai = _INC_OFF_TYPE(coff, app_info_t);
+		// ELF header.
+		ctxt->off_self.off_ehdr = _INC_OFF_SIZE(coff, ctxt->makeself->ehsize);
+		// ELF Program headers.
+		ctxt->off_self.off_phdr = _INC_OFF_SIZE(coff, ctxt->makeself->phsize);
+		// Section info.
+		ctxt->off_self.off_si = _INC_OFF_SIZE(coff, sizeof(section_info_t) * ctxt->makeself->si_cnt);
+		// SCE version.
+		ctxt->off_self.off_sv = _INC_OFF_TYPE(coff, sce_version_t);
+		// Control infos.
+		ctxt->off_self.off_cis = _INC_OFF_SIZE(coff, _sce_get_ci_len(ctxt));
+	}
+	break;
 	case SCE_HEADER_TYPE_RVK:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_PKG:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_SPP:
-		//TODO
+		// TODO
 		break;
 	default:
-		//TODO
+		// TODO
 		break;
 	}
 
-	//Metadata info.
+	// Metadata info.
 	ctxt->off_metai = _INC_OFF_TYPE(coff, metadata_info_t);
-	//Metadata header.
+	// Metadata header.
 	ctxt->off_metah = _INC_OFF_TYPE(coff, metadata_header_t);
-	//Metadata section headers.
+	// Metadata section headers.
 	ctxt->off_metash = _INC_OFF_SIZE(coff, ctxt->metah->section_count * sizeof(metadata_section_header_t));
-	//Keys.
+	// Keys.
 	_sce_fixup_keys(ctxt);
 	ctxt->off_keys = _INC_OFF_SIZE(coff, ctxt->keys_len);
 
-	//SELF only headers.
-	if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
+	// SELF only headers.
+	if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
 	{
-		//Optional headers.
+		// Optional headers.
 		ctxt->off_self.off_ohs = _INC_OFF_SIZE(coff, _sce_get_oh_len(ctxt));
 	}
 
-	//Signature.
+	// Signature.
 	ctxt->off_sig = _INC_OFF_TYPE(coff, signature_t);
 
-	//Header padding.
+	// Header padding.
 	ctxt->off_hdrpad = coff;
 	coff = ALIGN(coff, HEADER_ALIGN);
-	
-	//Set header length.
+
+	// Set header length.
 	ctxt->sceh->header_len = coff;
 
-	//Set missing values, etc.
+	// Set missing values, etc.
 	_sce_fixup_ctxt(ctxt);
 }
 
@@ -569,87 +572,87 @@ static void _sce_build_header(sce_buffer_ctxt_t *ctxt)
 {
 	u32 i;
 
-	//Allocate header buffer.
-	ctxt->scebuffer = (u8*)malloc(sizeof(u8) * ctxt->sceh->header_len);
+	// Allocate header buffer.
+	ctxt->scebuffer = (u8 *)malloc(sizeof(u8) * ctxt->sceh->header_len);
 	memset(ctxt->scebuffer, 0, sizeof(u8) * ctxt->sceh->header_len);
 
-	//SCE header.
+	// SCE header.
 	_copy_es_sce_header((sce_header_t *)(ctxt->scebuffer + ctxt->off_sceh), ctxt->sceh);
 
-	//File type dependent headers.
-	switch(ctxt->sceh->header_type)
+	// File type dependent headers.
+	switch (ctxt->sceh->header_type)
 	{
 	case SCE_HEADER_TYPE_SELF:
+	{
+		// SELF header.
+		_copy_es_self_header((self_header_t *)(ctxt->scebuffer + ctxt->off_self.off_selfh), ctxt->self.selfh);
+		// Application info.
+		_copy_es_app_info((app_info_t *)(ctxt->scebuffer + ctxt->off_self.off_ai), ctxt->self.ai);
+		// ELF header.
+		memcpy(ctxt->scebuffer + ctxt->off_self.off_ehdr, ctxt->makeself->ehdr, ctxt->makeself->ehsize);
+		// ELF program headers.
+		memcpy(ctxt->scebuffer + ctxt->off_self.off_phdr, ctxt->makeself->phdrs, ctxt->makeself->phsize);
+
+		// Section info.
+		u32 i;
+		for (i = 0; i < ctxt->makeself->si_cnt; i++)
+			_copy_es_section_info((section_info_t *)(ctxt->scebuffer + ctxt->off_self.off_si + sizeof(section_info_t) * i), &ctxt->self.si[i]);
+
+		// SCE version.
+		_copy_es_sce_version((sce_version_t *)(ctxt->scebuffer + ctxt->off_self.off_sv), ctxt->self.sv);
+
+		// Control infos.
+		u32 ci_base = ctxt->off_self.off_cis;
+		LIST_FOREACH(iter, ctxt->self.cis)
 		{
-			//SELF header.
-			_copy_es_self_header((self_header_t *)(ctxt->scebuffer + ctxt->off_self.off_selfh), ctxt->self.selfh);
-			//Application info.
-			_copy_es_app_info((app_info_t *)(ctxt->scebuffer + ctxt->off_self.off_ai), ctxt->self.ai);
-			//ELF header.
-			memcpy(ctxt->scebuffer + ctxt->off_self.off_ehdr, ctxt->makeself->ehdr, ctxt->makeself->ehsize);
-			//ELF program headers.
-			memcpy(ctxt->scebuffer + ctxt->off_self.off_phdr, ctxt->makeself->phdrs, ctxt->makeself->phsize);
+			control_info_t *ci = (control_info_t *)iter->value;
 
-			//Section info.
-			u32 i;
-			for(i = 0; i < ctxt->makeself->si_cnt; i++)
-				_copy_es_section_info((section_info_t *)(ctxt->scebuffer + ctxt->off_self.off_si + sizeof(section_info_t) * i), &ctxt->self.si[i]);
+			// Copy control info header.
+			_copy_es_control_info((control_info_t *)(ctxt->scebuffer + ci_base), ci);
+			// Copy data.
+			memcpy(ctxt->scebuffer + ci_base + sizeof(control_info_t), ((u8 *)ci) + sizeof(control_info_t), ci->size - sizeof(control_info_t));
 
-			//SCE version.
-			_copy_es_sce_version((sce_version_t *)(ctxt->scebuffer + ctxt->off_self.off_sv), ctxt->self.sv);
-
-			//Control infos.
-			u32 ci_base = ctxt->off_self.off_cis;
-			LIST_FOREACH(iter, ctxt->self.cis)
-			{
-				control_info_t *ci = (control_info_t *)iter->value;
-
-				//Copy control info header.
-				_copy_es_control_info((control_info_t *)(ctxt->scebuffer + ci_base), ci);
-				//Copy data.
-				memcpy(ctxt->scebuffer + ci_base + sizeof(control_info_t), ((u8 *)ci) + sizeof(control_info_t), ci->size - sizeof(control_info_t));
-
-				ci_base += ci->size;
-			}
+			ci_base += ci->size;
 		}
-		break;
+	}
+	break;
 	case SCE_HEADER_TYPE_RVK:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_PKG:
-		//TODO
+		// TODO
 		break;
 	case SCE_HEADER_TYPE_SPP:
-		//TODO
+		// TODO
 		break;
 	default:
-		//TODO
+		// TODO
 		break;
 	}
 
-	//Metadata info.
+	// Metadata info.
 	memcpy(ctxt->scebuffer + ctxt->off_metai, ctxt->metai, sizeof(metadata_info_t));
-	//Metadata header.
+	// Metadata header.
 	_copy_es_metadata_header((metadata_header_t *)(ctxt->scebuffer + ctxt->off_metah), ctxt->metah);
-	//Metadata section headers.
-	for(i = 0; i < ctxt->metah->section_count; i++)
+	// Metadata section headers.
+	for (i = 0; i < ctxt->metah->section_count; i++)
 		_copy_es_metadata_section_header((metadata_section_header_t *)(ctxt->scebuffer + ctxt->off_metash + sizeof(metadata_section_header_t) * i), &ctxt->metash[i]);
 
-	//Keys.
-	//memcpy(ctxt->scebuffer + ctxt->off_keys, ctxt->keys, ctxt->keys_len);
+	// Keys.
+	// memcpy(ctxt->scebuffer + ctxt->off_keys, ctxt->keys, ctxt->keys_len);
 
-	//SELF only headers.
-	if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
+	// SELF only headers.
+	if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
 	{
-		//Optional headers.
+		// Optional headers.
 		u32 oh_base = ctxt->off_self.off_ohs;
 		LIST_FOREACH(iter, ctxt->self.ohs)
 		{
 			opt_header_t *oh = (opt_header_t *)iter->value;
 
-			//Copy optional header.
+			// Copy optional header.
 			_copy_es_opt_header((opt_header_t *)(ctxt->scebuffer + oh_base), oh);
-			//Copy data.
+			// Copy data.
 			memcpy(ctxt->scebuffer + oh_base + sizeof(opt_header_t), ((u8 *)oh) + sizeof(opt_header_t), oh->size - sizeof(opt_header_t));
 
 			oh_base += oh->size;
@@ -661,20 +664,20 @@ static BOOL _sce_sign_header(sce_buffer_ctxt_t *ctxt, keyset_t *ks)
 {
 	u8 hash[0x14];
 
-	//Well...
-	if(ks->priv == NULL || ks->pub == NULL)
+	// Well...
+	if (ks->priv == NULL || ks->pub == NULL)
 		return FALSE;
 
-	//Generate header hash.
+	// Generate header hash.
 	sha1(ctxt->scebuffer, ctxt->metah->sig_input_length, hash);
 
-	//Generate signature.
+	// Generate signature.
 	ecdsa_set_curve(ks->ctype);
 	ecdsa_set_pub(ks->pub);
 	ecdsa_set_priv(ks->priv);
 	ecdsa_sign(hash, ctxt->sig->r, ctxt->sig->s);
 
-	//Copy Signature.
+	// Copy Signature.
 	memcpy(ctxt->scebuffer + ctxt->off_sig, ctxt->sig, sizeof(signature_t));
 
 	return TRUE;
@@ -704,45 +707,45 @@ static BOOL _sce_encrypt_header(sce_buffer_ctxt_t *ctxt, u8 *keyset)
 	keyset_t *ks;
 	aes_context aes_ctxt;
 
-	//Check if a keyset is provided.
-	if(keyset == NULL)
+	// Check if a keyset is provided.
+	if (keyset == NULL)
 	{
-		//Try to find keyset.
-		if((ks = keyset_find(ctxt)) == NULL)
+		// Try to find keyset.
+		if ((ks = keyset_find(ctxt)) == NULL)
 			return FALSE;
 	}
 	else
 	{
-		//Use the provided keyset.
+		// Use the provided keyset.
 		ks = keyset_from_buffer(keyset);
 	}
 
-	//Calculate hashes.
+	// Calculate hashes.
 	_sce_calculate_hashes(ctxt);
 
-	//Copy keys.
+	// Copy keys.
 	memcpy(ctxt->scebuffer + ctxt->off_keys, ctxt->keys, ctxt->keys_len);
 
-	//Sign header.
+	// Sign header.
 	_sce_sign_header(ctxt, ks);
 
-	//Encrypt metadata header, metadata section headers and keys.
+	// Encrypt metadata header, metadata section headers and keys.
 	nc_off = 0;
 	ptr = ctxt->scebuffer + ctxt->off_metah;
 	aes_setkey_enc(&aes_ctxt, ctxt->metai->key, METADATA_INFO_KEYBITS);
 	memcpy(iv, ctxt->metai->iv, 0x10);
-	aes_crypt_ctr(&aes_ctxt, 
-		ctxt->sceh->header_len - (sizeof(sce_header_t) + ctxt->sceh->metadata_offset + sizeof(metadata_info_t)), 
-		&nc_off, iv, sblk, ptr, ptr);
+	aes_crypt_ctr(&aes_ctxt,
+				  ctxt->sceh->header_len - (sizeof(sce_header_t) + ctxt->sceh->metadata_offset + sizeof(metadata_info_t)),
+				  &nc_off, iv, sblk, ptr, ptr);
 
-	//Encrypt metadata info.
+	// Encrypt metadata info.
 	aes_setkey_enc(&aes_ctxt, ks->erk, KEYBITS(ks->erklen));
 	ptr = ctxt->scebuffer + ctxt->off_metai;
 	aes_crypt_cbc(&aes_ctxt, AES_ENCRYPT, sizeof(metadata_info_t), ks->riv, ptr, ptr);
 
-	//Add NPDRM layer.
-	if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && ctxt->self.ai->self_type == SELF_TYPE_NPDRM)
-		if(np_encrypt_npdrm(ctxt) == FALSE)
+	// Add NPDRM layer.
+	if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && ctxt->self.ai->self_type == SELF_TYPE_NPDRM)
+		if (np_encrypt_npdrm(ctxt) == FALSE)
 			return FALSE;
 
 	return TRUE;
@@ -761,7 +764,7 @@ static void _sce_encrypt_data(sce_buffer_ctxt_t *ctxt)
 		u8 buf[16];
 		u8 iv[16];
 
-		if(ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
+		if (ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
 		{
 			memcpy(iv, ctxt->keys + ctxt->metash[i].iv_index * 0x10, 0x10);
 			aes_setkey_enc(&aes_ctxt, ctxt->keys + ctxt->metash[i].key_index * 0x10, 128);
@@ -774,14 +777,14 @@ static void _sce_encrypt_data(sce_buffer_ctxt_t *ctxt)
 
 BOOL sce_encrypt_ctxt(sce_buffer_ctxt_t *ctxt, u8 *keyset)
 {
-	//Build SCE file header.
+	// Build SCE file header.
 	_sce_build_header(ctxt);
 
-	//Encrypt header.
-	if(_sce_encrypt_header(ctxt, keyset) == FALSE)
+	// Encrypt header.
+	if (_sce_encrypt_header(ctxt, keyset) == FALSE)
 		return FALSE;
 
-	//Encrypt data.
+	// Encrypt data.
 	_sce_encrypt_data(ctxt);
 
 	return TRUE;
@@ -793,22 +796,22 @@ BOOL sce_write_ctxt(sce_buffer_ctxt_t *ctxt, s8 *fname)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, fname, -1, NULL, 0);
-	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
 	MultiByteToWideChar(CP_UTF8, 0, fname, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
 		return FALSE;
-	
+
 	free(fileWideStr);
 #else
 	if ((fp = fopen(fname, "wb")) == NULL)
 		return FALSE;
 #endif
 
-	//Write SCE file header.
+	// Write SCE file header.
 	fwrite(ctxt->scebuffer, sizeof(u8), ctxt->sceh->header_len, fp);
 
-	//Write SCE file sections.
+	// Write SCE file sections.
 	LIST_FOREACH(iter, ctxt->secs)
 	{
 		sce_section_ctxt_t *sec = (sce_section_ctxt_t *)iter->value;
@@ -829,78 +832,78 @@ BOOL sce_decrypt_header(sce_buffer_ctxt_t *ctxt, u8 *metadata_info, u8 *keyset)
 	keyset_t *ks;
 	aes_context aes_ctxt;
 
-	//Check if provided metadata info should be used.
-	if(metadata_info == NULL)
+	// Check if provided metadata info should be used.
+	if (metadata_info == NULL)
 	{
-		//Check if a keyset is provided.
-		if(keyset == NULL)
+		// Check if a keyset is provided.
+		if (keyset == NULL)
 		{
-			//Try to find keyset.
-			if((ks = keyset_find(ctxt)) == NULL)
+			// Try to find keyset.
+			if ((ks = keyset_find(ctxt)) == NULL)
 				return FALSE;
 
 			_LOG_VERBOSE("Using keyset [%s 0x%04X %s]\n", ks->name, ks->key_revision, sce_version_to_str(ks->version));
 		}
 		else
 		{
-			//Use the provided keyset.
+			// Use the provided keyset.
 			ks = keyset_from_buffer(keyset);
 		}
 
-		//Remove NPDRM layer.
-		if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && ctxt->self.ai->self_type == SELF_TYPE_NPDRM)
-			if(np_decrypt_npdrm(ctxt) == FALSE)
+		// Remove NPDRM layer.
+		if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && ctxt->self.ai->self_type == SELF_TYPE_NPDRM)
+			if (np_decrypt_npdrm(ctxt) == FALSE)
 				return FALSE;
 
-		//Decrypt metadata info.
+		// Decrypt metadata info.
 		aes_setkey_dec(&aes_ctxt, ks->erk, KEYBITS(ks->erklen));
 		memcpy(iv, ks->riv, 0x10); //!!!
 		aes_crypt_cbc(&aes_ctxt, AES_DECRYPT, sizeof(metadata_info_t), iv, (u8 *)ctxt->metai, (u8 *)ctxt->metai);
 	}
 	else
 	{
-		//Copy provided metadata info over SELF metadata.
+		// Copy provided metadata info over SELF metadata.
 		memcpy((u8 *)ctxt->metai, metadata_info, sizeof(metadata_info));
 	}
 
-	if(ctxt->metai->key_pad[0] != 0x00 || ctxt->metai->iv_pad[0] != 0x00)
+	if (ctxt->metai->key_pad[0] != 0x00 || ctxt->metai->iv_pad[0] != 0x00)
 		return FALSE;
 
-	//Decrypt metadata header, metadata section headers and keys.
+	// Decrypt metadata header, metadata section headers and keys.
 	nc_off = 0;
 	aes_setkey_enc(&aes_ctxt, ctxt->metai->key, METADATA_INFO_KEYBITS);
-	aes_crypt_ctr(&aes_ctxt, 
-		ctxt->sceh->header_len - (sizeof(sce_header_t) + ctxt->sceh->metadata_offset + sizeof(metadata_info_t)), 
-		&nc_off, ctxt->metai->iv, sblk, (u8 *)ctxt->metah, (u8 *)ctxt->metah);
+	aes_crypt_ctr(&aes_ctxt,
+				  ctxt->sceh->header_len - (sizeof(sce_header_t) + ctxt->sceh->metadata_offset + sizeof(metadata_info_t)),
+				  &nc_off, ctxt->metai->iv, sblk, (u8 *)ctxt->metah, (u8 *)ctxt->metah);
 
-	//Fixup headers.
+	// Fixup headers.
 	_es_metadata_header(ctxt->metah);
-	for(i = 0; i < ctxt->metah->section_count; i++)
+	for (i = 0; i < ctxt->metah->section_count; i++)
 		_es_metadata_section_header(&ctxt->metash[i]);
 
-	//Metadata decrypted.
+	// Metadata decrypted.
 	ctxt->mdec = TRUE;
 
-	//Set start of SCE file keys.
+	// Set start of SCE file keys.
 	ctxt->keys = (u8 *)ctxt->metash + sizeof(metadata_section_header_t) * ctxt->metah->section_count;
 	ctxt->keys_len = ctxt->metah->key_count * 0x10;
 
-	//Set SELF only headers.
-	if(ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
+	// Set SELF only headers.
+	if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF)
 	{
-		//Get pointers to all optional headers.
+		// Get pointers to all optional headers.
 		ctxt->self.ohs = list_create();
 		opt_header_t *oh = (opt_header_t *)(ctxt->keys + ctxt->metah->key_count * 0x10);
 		_es_opt_header(oh);
 		list_add_back(ctxt->self.ohs, oh);
-		while(oh->next != 0)
+		while (oh->next != 0)
 		{
 			oh = (opt_header_t *)((u8 *)oh + oh->size);
 			_es_opt_header(oh);
 			list_add_back(ctxt->self.ohs, oh);
 		}
 
-		//Signature.
+		// Signature.
 		ctxt->sig = (signature_t *)((u8 *)oh + oh->size);
 	}
 	else
@@ -914,17 +917,17 @@ BOOL sce_decrypt_data(sce_buffer_ctxt_t *ctxt)
 	u32 i;
 	aes_context aes_ctxt;
 
-	//Decrypt sections.
-	for(i = 0; i < ctxt->metah->section_count; i++)
+	// Decrypt sections.
+	for (i = 0; i < ctxt->metah->section_count; i++)
 	{
 		size_t nc_off = 0;
 		u8 buf[16];
 		u8 iv[16];
 
-		//Only decrypt encrypted sections.
-		if(ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
+		// Only decrypt encrypted sections.
+		if (ctxt->metash[i].encrypted == METADATA_SECTION_ENCRYPTED)
 		{
-			if(ctxt->metash[i].key_index > ctxt->metah->key_count - 1 || ctxt->metash[i].iv_index > ctxt->metah->key_count)
+			if (ctxt->metash[i].key_index > ctxt->metah->key_count - 1 || ctxt->metash[i].iv_index > ctxt->metah->key_count)
 				printf("[*] Warning: Skipped decryption of section %03d (marked encrypted but key/iv index out of range)\n", i);
 			else
 			{
@@ -943,23 +946,23 @@ void sce_print_info(FILE *fp, sce_buffer_ctxt_t *ctxt)
 {
 	u32 i;
 
-	//Print SCE header.
+	// Print SCE header.
 	_print_sce_header(fp, ctxt->sceh);
 
-	//Check if the metadata was decrypted.
-	if(ctxt->mdec == FALSE)
+	// Check if the metadata was decrypted.
+	if (ctxt->mdec == FALSE)
 		return;
 
-	//Print metadata infos.
+	// Print metadata infos.
 	_print_metadata_info(fp, ctxt->metai);
 	_print_metadata_header(fp, ctxt->metah);
 
-	//Print section infos.
+	// Print section infos.
 	_print_metadata_section_header_header(fp);
-	for(i = 0; i < ctxt->metah->section_count; i++)
+	for (i = 0; i < ctxt->metah->section_count; i++)
 		_print_metadata_section_header(fp, &ctxt->metash[i], i);
 
-	//Print keys.
+	// Print keys.
 	_print_sce_file_keys(fp, ctxt);
 }
 
@@ -980,14 +983,14 @@ u64 sce_str_to_version(s8 *version)
 
 u64 sce_hexver_to_decver(u64 version)
 {
-	//TODO: hackity hack.
+	// TODO: hackity hack.
 	s8 tmp[16];
 	u32 v = version >> 32;
 	u64 res;
 
 	sprintf(tmp, "%02X%02X", (v & 0xFFFF0000) >> 16, v & 0x0000FFFF);
 	sscanf(tmp, "%d", &v);
-	res = v*100;
+	res = v * 100;
 
 	return res;
 }
@@ -997,7 +1000,7 @@ control_info_t *sce_get_ctrl_info(sce_buffer_ctxt_t *ctxt, u32 type)
 	LIST_FOREACH(iter, ctxt->self.cis)
 	{
 		control_info_t *ci = (control_info_t *)iter->value;
-		if(ci->type == type)
+		if (ci->type == type)
 			return ci;
 	}
 
@@ -1009,7 +1012,7 @@ opt_header_t *sce_get_opt_header(sce_buffer_ctxt_t *ctxt, u32 type)
 	LIST_FOREACH(iter, ctxt->self.ohs)
 	{
 		opt_header_t *oh = (opt_header_t *)iter->value;
-		if(oh->type == type)
+		if (oh->type == type)
 			return oh;
 	}
 

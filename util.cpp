@@ -15,7 +15,7 @@
 
 #if _WIN32
 #define WIN32_LEAN_AND_MEAN
-#include "Windows.h"
+#include "windows.h"
 #endif
 
 void _hexdump(FILE *fp, const char *name, u32 offset, u8 *buf, int len, BOOL print_addr)
@@ -57,12 +57,12 @@ u8 *_read_buffer(const s8 *file, u32 *length)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
-	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
 	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"rb")) == NULL)
 		return NULL;
-	
+
 	free(fileWideStr);
 #else
 	if ((fp = fopen(file, "rb")) == NULL)
@@ -90,9 +90,9 @@ int _write_buffer(const s8 *file, u8 *buffer, u32 length)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
-	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
 	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
-	
+
 	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
 		return NULL;
 
