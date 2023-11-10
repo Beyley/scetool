@@ -19,6 +19,11 @@
 #include "aes.h"
 #include "util.h"
 
+#if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
+#endif
+
 /*! klicensee key. */
 static u8 *_klicensee_key;
 
@@ -217,8 +222,19 @@ BOOL np_sign_file(s8 *fname)
 	if((ks = keyset_find_by_name(CONFIG_NP_SIG_KNAME)) == NULL)
 		return FALSE;
 
-	if((fp = fopen(fname, "r+b")) == NULL)
+#ifdef _WIN32
+	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, fname, -1, NULL, 0);
+	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	MultiByteToWideChar(CP_UTF8, 0, fname, -1, fileWideStr, utf16Len);
+
+	if ((fp = _wfopen(fileWideStr, L"r+b")) == NULL)
 		return FALSE;
+	
+	free(fileWideStr);
+#else
+	if ((fp = fopen(fname, "r+b")) == NULL)
+		return FALSE;
+#endif
 
 	fseek(fp, 0, SEEK_END);
 	length = ftell(fp);

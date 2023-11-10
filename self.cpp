@@ -18,6 +18,11 @@
 #include "sha1.h"
 #include "np.h"
 
+#if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
+#endif
+
 static void _get_shdr_flags(s8 *str, u64 flags)
 {
 	memset(str, '-', 3);
@@ -532,8 +537,19 @@ BOOL self_write_to_elf(sce_buffer_ctxt_t *ctxt, const s8 *elf_out)
 	if(ctxt->sceh->header_type != SCE_HEADER_TYPE_SELF)
 		return FALSE;
 
-	if((fp = fopen(elf_out, "wb")) == NULL)
+#ifdef _WIN32
+	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, elf_out, -1, NULL, 0);
+	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	MultiByteToWideChar(CP_UTF8, 0, elf_out, -1, fileWideStr, utf16Len);
+
+	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
 		return FALSE;
+	
+	free(fileWideStr);
+#else
+	if ((fp = fopen(elf_out, "wb")) == NULL)
+		return FALSE;
+#endif
 
 	self_type = ctxt->self.ai->self_type;
 	eident = ctxt->scebuffer + ctxt->self.selfh->elf_offset;

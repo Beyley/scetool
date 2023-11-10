@@ -21,10 +21,6 @@
 #include "tables.h"
 #include "frontend.h"
 
-#ifdef _WIN32
-#include <locale.h>
-#endif
-
 /*! Parameters. */
 #ifndef CLI_APP
 extern
@@ -363,11 +359,6 @@ static BOOL _fill_npdrm_config(self_config_t *sconf)
 
 export void frontend_print_infos(s8 *file)
 {
-#ifdef _WIN32
-	// On windows, we need to set the locale to UTF-8, since that is what C# passes to us
-	setlocale(LC_ALL, ".65001");
-#endif
-
 	u8 *buf = _read_buffer(file, NULL);
 	if (buf != NULL)
 	{
@@ -425,11 +416,6 @@ export void frontend_print_infos(s8 *file)
 
 export void frontend_decrypt(s8 *file_in, s8 *file_out)
 {
-#ifdef _WIN32
-	// On windows, we need to set the locale to UTF-8, since that is what C# passes to us
-	setlocale(LC_ALL, ".65001");
-#endif
-
 	u8 *buf = _read_buffer(file_in, NULL);
 	if (buf != NULL)
 	{
@@ -530,11 +516,6 @@ export void set_disc_encrypt_options()
 
 export void frontend_encrypt(s8 *file_in, s8 *file_out)
 {
-#ifdef _WIN32
-	// On windows, we need to set the locale to UTF-8, since that is what C# passes to us
-	setlocale(LC_ALL, ".65001");
-#endif
-
 	BOOL can_compress = FALSE;
 	self_config_t sconf;
 	sce_buffer_ctxt_t *ctxt;

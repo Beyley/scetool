@@ -13,6 +13,11 @@
 #include "zlib.h"
 #include "mt19937.h"
 
+#if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
+#endif
+
 void _hexdump(FILE *fp, const char *name, u32 offset, u8 *buf, int len, BOOL print_addr)
 {
 	int i, j, align = strlen(name) + 1;
@@ -50,8 +55,19 @@ u8 *_read_buffer(const s8 *file, u32 *length)
 	FILE *fp;
 	u32 size;
 
+#ifdef _WIN32
+	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
+	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
+
+	if ((fp = _wfopen(fileWideStr, L"rb")) == NULL)
+		return NULL;
+	
+	free(fileWideStr);
+#else
 	if ((fp = fopen(file, "rb")) == NULL)
 		return NULL;
+#endif
 
 	fseek(fp, 0, SEEK_END);
 	size = ftell(fp);
@@ -72,8 +88,19 @@ int _write_buffer(const s8 *file, u8 *buffer, u32 length)
 {
 	FILE *fp;
 
+#ifdef _WIN32
+	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
+	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
+	
+	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
+		return NULL;
+
+	free(fileWideStr);
+#else
 	if ((fp = fopen(file, "wb")) == NULL)
-		return 0;
+		return NULL;
+#endif
 
 	/**/
 	while (length > 0)

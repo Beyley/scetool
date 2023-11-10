@@ -23,6 +23,11 @@
 #include "zlib.h"
 #include "np.h"
 
+#if _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include "Windows.h"
+#endif
+
 void _print_sce_header(FILE *fp, sce_header_t *h)
 {
 	const s8 *name;
@@ -786,8 +791,19 @@ BOOL sce_write_ctxt(sce_buffer_ctxt_t *ctxt, s8 *fname)
 {
 	FILE *fp;
 
-	if((fp = fopen(fname, "wb")) == NULL)
+#ifdef _WIN32
+	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, fname, -1, NULL, 0);
+	wchar_t* fileWideStr = (wchar_t*)malloc(utf16Len);
+	MultiByteToWideChar(CP_UTF8, 0, fname, -1, fileWideStr, utf16Len);
+
+	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
 		return FALSE;
+	
+	free(fileWideStr);
+#else
+	if ((fp = fopen(fname, "wb")) == NULL)
+		return FALSE;
+#endif
 
 	//Write SCE file header.
 	fwrite(ctxt->scebuffer, sizeof(u8), ctxt->sceh->header_len, fp);
