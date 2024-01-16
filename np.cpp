@@ -53,6 +53,13 @@ void np_set_klicensee(u8 *klicensee)
 	_klicensee_key = klicensee;
 }
 
+u8 *_last_content_id = NULL;
+
+extern "C" u8 *get_last_content_id()
+{
+	return _last_content_id;
+}
+
 BOOL np_decrypt_npdrm(sce_buffer_ctxt_t *ctxt)
 {
 	aes_context aes_ctxt;
@@ -81,6 +88,14 @@ BOOL np_decrypt_npdrm(sce_buffer_ctxt_t *ctxt)
 	{
 		if ((klicensee_by_content_id((s8 *)np->content_id, npdrm_key)) == FALSE)
 			return FALSE;
+
+		// Free last content id.
+		if (_last_content_id != NULL)
+			free(_last_content_id);
+
+		// Save content id for later use.
+		_last_content_id = (u8 *)malloc(0x30);
+		memcpy(_last_content_id, np->content_id, 0x30);
 	}
 	else
 		return FALSE;
