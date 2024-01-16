@@ -1,8 +1,8 @@
 /*
-* Copyright (c) 2011-2013 by naehrwert
-* Copyright (c) 2012 by flatz
-* This file is released under the GPLv2.
-*/
+ * Copyright (c) 2011-2013 by naehrwert
+ * Copyright (c) 2012 by flatz
+ * This file is released under the GPLv2.
+ */
 
 #include <stdlib.h>
 #include <string.h>
@@ -50,85 +50,81 @@ curve_t *_curves;
 /*! Loaded VSH curves. */
 vsh_curve_t *_vsh_curves;
 /*! Path to rap directory. */
-static s8* rap_path = CONFIG_RAP_PATH;
+static s8 *rap_path = CONFIG_RAP_PATH;
 
-static u8 rap_init_key[0x10] = 
-{
-	0x86, 0x9F, 0x77, 0x45, 0xC1, 0x3F, 0xD8, 0x90, 0xCC, 0xF2, 0x91, 0x88, 0xE3, 0xCC, 0x3E, 0xDF
-};
+static u8 rap_init_key[0x10] =
+	{
+		0x86, 0x9F, 0x77, 0x45, 0xC1, 0x3F, 0xD8, 0x90, 0xCC, 0xF2, 0x91, 0x88, 0xE3, 0xCC, 0x3E, 0xDF};
 
-static u8 rap_pbox[0x10] = 
-{
-	0x0C, 0x03, 0x06, 0x04, 0x01, 0x0B, 0x0F, 0x08, 0x02, 0x07, 0x00, 0x05, 0x0A, 0x0E, 0x0D, 0x09
-};
+static u8 rap_pbox[0x10] =
+	{
+		0x0C, 0x03, 0x06, 0x04, 0x01, 0x0B, 0x0F, 0x08, 0x02, 0x07, 0x00, 0x05, 0x0A, 0x0E, 0x0D, 0x09};
 
-static u8 rap_e1[0x10] = 
-{
-	0xA9, 0x3E, 0x1F, 0xD6, 0x7C, 0x55, 0xA3, 0x29, 0xB7, 0x5F, 0xDD, 0xA6, 0x2A, 0x95, 0xC7, 0xA5
-};
+static u8 rap_e1[0x10] =
+	{
+		0xA9, 0x3E, 0x1F, 0xD6, 0x7C, 0x55, 0xA3, 0x29, 0xB7, 0x5F, 0xDD, 0xA6, 0x2A, 0x95, 0xC7, 0xA5};
 
-static u8 rap_e2[0x10] = 
-{
-	0x67, 0xD4, 0x5D, 0xA3, 0x29, 0x6D, 0x00, 0x6A, 0x4E, 0x7C, 0x53, 0x7B, 0xF5, 0x53, 0x8C, 0x74
-};
+static u8 rap_e2[0x10] =
+	{
+		0x67, 0xD4, 0x5D, 0xA3, 0x29, 0x6D, 0x00, 0x6A, 0x4E, 0x7C, 0x53, 0x7B, 0xF5, 0x53, 0x8C, 0x74};
 
 static void _fill_property(keyset_t *ks, s8 *prop, s8 *value)
 {
-	if(strcmp(prop, "type") == 0)
+	if (strcmp(prop, "type") == 0)
 	{
-		if(strcmp(value, "SELF") == 0)
+		if (strcmp(value, "SELF") == 0)
 			ks->type = KEYTYPE_SELF;
-		else if(strcmp(value, "RVK") == 0)
+		else if (strcmp(value, "RVK") == 0)
 			ks->type = KEYTYPE_RVK;
-		else if(strcmp(value, "PKG") == 0)
+		else if (strcmp(value, "PKG") == 0)
 			ks->type = KEYTYPE_PKG;
-		else if(strcmp(value, "SPP") == 0)
+		else if (strcmp(value, "SPP") == 0)
 			ks->type = KEYTYPE_SPP;
-		else if(strcmp(value, "OTHER") == 0)
+		else if (strcmp(value, "OTHER") == 0)
 			ks->type = KEYTYPE_OTHER;
 		else
 			printf("[*] Error: Unknown type '%s'.\n", value);
 	}
-	else if(strcmp(prop, "revision") == 0)
+	else if (strcmp(prop, "revision") == 0)
 		ks->key_revision = (u16)_x_to_u64(value);
-	else if(strcmp(prop, "version") == 0)
+	else if (strcmp(prop, "version") == 0)
 		ks->version = _x_to_u64(value);
-	else if(strcmp(prop, "self_type") == 0)
+	else if (strcmp(prop, "self_type") == 0)
 	{
-		if(strcmp(value, "LV0") == 0)
+		if (strcmp(value, "LV0") == 0)
 			ks->self_type = SELF_TYPE_LV0;
-		else if(strcmp(value, "LV1") == 0)
+		else if (strcmp(value, "LV1") == 0)
 			ks->self_type = SELF_TYPE_LV1;
-		else if(strcmp(value, "LV2") == 0)
+		else if (strcmp(value, "LV2") == 0)
 			ks->self_type = SELF_TYPE_LV2;
-		else if(strcmp(value, "APP") == 0)
+		else if (strcmp(value, "APP") == 0)
 			ks->self_type = SELF_TYPE_APP;
-		else if(strcmp(value, "ISO") == 0)
+		else if (strcmp(value, "ISO") == 0)
 			ks->self_type = SELF_TYPE_ISO;
-		else if(strcmp(value, "LDR") == 0)
+		else if (strcmp(value, "LDR") == 0)
 			ks->self_type = SELF_TYPE_LDR;
-		else if(strcmp(value, "UNK_7") == 0)
+		else if (strcmp(value, "UNK_7") == 0)
 			ks->self_type = SELF_TYPE_UNK_7;
-		else if(strcmp(value, "NPDRM") == 0)
+		else if (strcmp(value, "NPDRM") == 0)
 			ks->self_type = SELF_TYPE_NPDRM;
 		else
 			printf("[*] Error: unknown SELF type '%s'.\n", value);
 	}
-	else if(strcmp(prop, "erk") == 0 || strcmp(prop, "key") == 0)
+	else if (strcmp(prop, "erk") == 0 || strcmp(prop, "key") == 0)
 	{
 		ks->erk = _x_to_u8_buffer(value);
 		ks->erklen = strlen(value) / 2;
 	}
-	else if(strcmp(prop, "riv") == 0)
+	else if (strcmp(prop, "riv") == 0)
 	{
 		ks->riv = _x_to_u8_buffer(value);
 		ks->rivlen = strlen(value) / 2;
 	}
-	else if(strcmp(prop, "pub") == 0)
+	else if (strcmp(prop, "pub") == 0)
 		ks->pub = _x_to_u8_buffer(value);
-	else if(strcmp(prop, "priv") == 0)
+	else if (strcmp(prop, "priv") == 0)
 		ks->priv = _x_to_u8_buffer(value);
-	else if(strcmp(prop, "ctype") == 0)
+	else if (strcmp(prop, "ctype") == 0)
 		ks->ctype = (u8)_x_to_u64(value);
 	else
 		printf("[*] Error: Unknown keyfile property '%s'.\n", prop);
@@ -138,7 +134,7 @@ static s64 _compare_keysets(keyset_t *ks1, keyset_t *ks2)
 {
 	s64 res;
 
-	if((res = (s64)ks1->version - (s64)ks2->version) == 0)
+	if ((res = (s64)ks1->version - (s64)ks2->version) == 0)
 		res = (s64)ks1->key_revision - (s64)ks2->key_revision;
 
 	return res;
@@ -151,12 +147,12 @@ static void _sort_keysets()
 
 	list_t *tmp = list_create();
 
-	for(i = 0; i < to; i++)
+	for (i = 0; i < to; i++)
 	{
 		max = _keysets->head;
 		LIST_FOREACH(iter, _keysets)
 		{
-			if(_compare_keysets((keyset_t *)max->value, (keyset_t *)iter->value) < 0)
+			if (_compare_keysets((keyset_t *)max->value, (keyset_t *)iter->value) < 0)
 				max = iter;
 		}
 		list_push(tmp, max->value);
@@ -173,8 +169,8 @@ void _print_key_list(FILE *fp)
 	s32 len = 0, tmp;
 
 	LIST_FOREACH(iter, _keysets)
-		if((tmp = strlen(((keyset_t *)iter->value)->name)) > len)
-			len = tmp;
+	if ((tmp = strlen(((keyset_t *)iter->value)->name)) > len)
+		len = tmp;
 
 	fprintf(fp, " Name");
 	_print_align(fp, " ", len, 4);
@@ -186,10 +182,10 @@ void _print_key_list(FILE *fp)
 		fprintf(fp, " %s", ks->name);
 		_print_align(fp, " ", len, strlen(ks->name));
 		fprintf(fp, " %-5s 0x%04X   %s   ", _get_name(_key_types, ks->type), ks->key_revision, sce_version_to_str(ks->version));
-		if(ks->type == KEYTYPE_SELF)
+		if (ks->type == KEYTYPE_SELF)
 		{
 			name = _get_name(_self_types, ks->self_type);
-			if(name != NULL)
+			if (name != NULL)
 				fprintf(fp, "[%s]\n", name);
 			else
 				fprintf(fp, "0x%08X\n", ks->self_type);
@@ -206,70 +202,74 @@ BOOL keys_load(void)
 	s8 lbuf[LINEBUFSIZE];
 	keyset_t *cks = NULL;
 
-	if((_keysets = list_create()) == NULL)
+	if ((_keysets = list_create()) == NULL)
 		return FALSE;
 
 	const int keys_len = strlen(FILE_KEYS);
-	const char* pos = FILE_KEYS;
+	const char *pos = FILE_KEYS;
 	int read;
 
 	do
 	{
-		//Get next line.
+		// Get next line.
 		lbuf[0] = 0;
 		// Read until newline or size reached
-    	for (read = 0; read < LINEBUFSIZE; read++) {
-        	if (pos[read] == '\n' || pos[read] == '\0') {
-	            break;
-        	}
-        	lbuf[read] = pos[read];
-    	}
+		for (read = 0; read < LINEBUFSIZE; read++)
+		{
+			if (pos[read] == '\n' || pos[read] == '\0')
+			{
+				break;
+			}
+			lbuf[read] = pos[read];
+		}
 		lbuf[read] = '\0';
 
 		lblen = strlen(lbuf);
 
-		//Don't parse empty lines (ignore '\n') and comment lines (starting with '#').
-		if(lblen > 1 && lbuf[0] != '#')
+		// Don't parse empty lines (ignore '\n') and comment lines (starting with '#').
+		if (lblen > 1 && lbuf[0] != '#')
 		{
-			//Check for keyset entry.
-			if(lblen > 2 && lbuf[0] == '[')
+			// Check for keyset entry.
+			if (lblen > 2 && lbuf[0] == '[')
 			{
-				if(cks != NULL)
+				if (cks != NULL)
 				{
-					//Add to keyset list.
+					// Add to keyset list.
 					list_push(_keysets, cks);
 					cks = NULL;
 				}
 
-				//Find name end.
-				for(i = 0; lbuf[i] != ']' && lbuf[i] != '\n' && i < lblen; i++);
+				// Find name end.
+				for (i = 0; lbuf[i] != ']' && lbuf[i] != '\n' && i < lblen; i++)
+					;
 				lbuf[i] = 0;
 
-				//Allocate keyset and fill name.
+				// Allocate keyset and fill name.
 				cks = (keyset_t *)malloc(sizeof(keyset_t));
 				memset(cks, 0, sizeof(keyset_t));
 				cks->name = strdup(&lbuf[1]);
 			}
-			else if(cks != NULL)
+			else if (cks != NULL)
 			{
-				//Find property name end.
-				for(i = 0; lbuf[i] != '=' && lbuf[i] != '\n' && i < lblen; i++);
+				// Find property name end.
+				for (i = 0; lbuf[i] != '=' && lbuf[i] != '\n' && i < lblen; i++)
+					;
 				lbuf[i] = 0;
 
-				//Fill property.
-				_fill_property(cks, &lbuf[0], &lbuf[i+1]);
+				// Fill property.
+				_fill_property(cks, &lbuf[0], &lbuf[i + 1]);
 			}
 		}
 
 		// Move to next line
 		pos += read + 1;
-	} while(pos - FILE_KEYS < keys_len);
+	} while (pos - FILE_KEYS < keys_len);
 
-	//Add last keyset to keyset list.
-	if(cks != NULL)
+	// Add last keyset to keyset list.
+	if (cks != NULL)
 		list_push(_keysets, cks);
 
-	//Sort keysets.
+	// Sort keysets.
 	_sort_keysets();
 
 	return TRUE;
@@ -282,34 +282,34 @@ static keyset_t *_keyset_find_for_self(u32 self_type, u16 key_revision, u64 vers
 	{
 		keyset_t *ks = (keyset_t *)iter->value;
 
-		if(ks->self_type == self_type)
+		if (ks->self_type == self_type)
 		{
-			switch(self_type)
+			switch (self_type)
 			{
 			case SELF_TYPE_LV0:
 				return ks;
 				break;
 			case SELF_TYPE_LV1:
-				if(version <= ks->version)
+				if (version <= ks->version)
 					return ks;
 				break;
 			case SELF_TYPE_LV2:
-				if(version <= ks->version)
+				if (version <= ks->version)
 					return ks;
 				break;
 			case SELF_TYPE_APP:
-				if(key_revision == ks->key_revision)
+				if (key_revision == ks->key_revision)
 					return ks;
 				break;
 			case SELF_TYPE_ISO:
-				if(version <= ks->version && key_revision == ks->key_revision)
+				if (version <= ks->version && key_revision == ks->key_revision)
 					return ks;
 				break;
 			case SELF_TYPE_LDR:
 				return ks;
 				break;
 			case SELF_TYPE_NPDRM:
-				if(key_revision == ks->key_revision)
+				if (key_revision == ks->key_revision)
 					return ks;
 				break;
 			}
@@ -325,7 +325,7 @@ static keyset_t *_keyset_find_for_rvk(u32 key_revision)
 	{
 		keyset_t *ks = (keyset_t *)iter->value;
 
-		if(ks->type == KEYTYPE_RVK && key_revision <= ks->key_revision)
+		if (ks->type == KEYTYPE_RVK && key_revision <= ks->key_revision)
 			return ks;
 	}
 
@@ -338,7 +338,7 @@ static keyset_t *_keyset_find_for_pkg(u16 key_revision)
 	{
 		keyset_t *ks = (keyset_t *)iter->value;
 
-		if(ks->type == KEYTYPE_PKG && key_revision <= ks->key_revision)
+		if (ks->type == KEYTYPE_PKG && key_revision <= ks->key_revision)
 			return ks;
 	}
 
@@ -351,7 +351,7 @@ static keyset_t *_keyset_find_for_spp(u16 key_revision)
 	{
 		keyset_t *ks = (keyset_t *)iter->value;
 
-		if(ks->type == KEYTYPE_SPP && key_revision <= ks->key_revision)
+		if (ks->type == KEYTYPE_SPP && key_revision <= ks->key_revision)
 			return ks;
 	}
 
@@ -362,7 +362,7 @@ keyset_t *keyset_find(sce_buffer_ctxt_t *ctxt)
 {
 	keyset_t *res = NULL;
 
-	switch(ctxt->sceh->header_type)
+	switch (ctxt->sceh->header_type)
 	{
 	case SCE_HEADER_TYPE_SELF:
 		res = _keyset_find_for_self(ctxt->self.ai->self_type, ctxt->sceh->key_revision, ctxt->self.ai->version);
@@ -378,7 +378,7 @@ keyset_t *keyset_find(sce_buffer_ctxt_t *ctxt)
 		break;
 	}
 
-	if(res == NULL)
+	if (res == NULL)
 		printf("[*] Error: Could not find keyset for %s.\n", _get_name(_sce_header_types, ctxt->sceh->header_type));
 
 	return res;
@@ -389,7 +389,7 @@ keyset_t *keyset_find_by_name(const s8 *name)
 	LIST_FOREACH(iter, _keysets)
 	{
 		keyset_t *ks = (keyset_t *)iter->value;
-		if(strcmp(ks->name, name) == 0)
+		if (strcmp(ks->name, name) == 0)
 			return ks;
 	}
 
@@ -406,7 +406,7 @@ BOOL curves_load(void)
 
 curve_t *curve_find(u8 ctype)
 {
-	if(ctype > CTYPE_MAX)
+	if (ctype > CTYPE_MAX)
 		return NULL;
 	return &_curves[ctype];
 }
@@ -420,120 +420,125 @@ BOOL vsh_curves_load(void)
 static curve_t _tmp_curve;
 curve_t *vsh_curve_find(u8 ctype)
 {
-	if(ctype > VSH_CTYPE_MAX)
+	if (ctype > VSH_CTYPE_MAX)
 		return NULL;
 
 	_memcpy_inv(_tmp_curve.p, _vsh_curves[ctype].p, 20);
 	_memcpy_inv(_tmp_curve.a, _vsh_curves[ctype].a, 20);
 	_memcpy_inv(_tmp_curve.b, _vsh_curves[ctype].b, 20);
 	_tmp_curve.N[0] = ~0x00;
-	_memcpy_inv(_tmp_curve.N+1, _vsh_curves[ctype].N, 20);
+	_memcpy_inv(_tmp_curve.N + 1, _vsh_curves[ctype].N, 20);
 	_memcpy_inv(_tmp_curve.Gx, _vsh_curves[ctype].Gx, 20);
 	_memcpy_inv(_tmp_curve.Gy, _vsh_curves[ctype].Gx, 20);
 
 	return &_tmp_curve;
 }
 
+s8 *_idps_file_path = NULL;
+
+export void set_idps_file_path(const s8 *file_in)
+{
+	// Create a duplicate of the input file, this technically leaks memory, but it doesnt matter for the intended usecase of this library
+	_idps_file_path = strdup(file_in);
+}
+
 static u8 *idps_load()
 {
-	s8 *ps3 = NULL, path[256];
 	u8 *idps;
 	u32 len = 0;
 
-	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-		if(access(ps3, 0) != 0)
-			ps3 = NULL;
+	printf("[*] Info: Reading IDPS from path %s.\n", _idps_file_path);
 
-	if(ps3 != NULL)
-	{
-		sprintf(path, "%s/%s", ps3, CONFIG_IDPS_FILE);
-		if(access(path, 0) != 0)
-			sprintf(path, "%s/%s", CONFIG_IDPS_PATH, CONFIG_IDPS_FILE);
-	}
-	else
-		sprintf(path, "%s/%s", CONFIG_IDPS_PATH, CONFIG_IDPS_FILE);
+	idps = (u8 *)_read_buffer(_idps_file_path, &len);
 
-	idps = (u8 *)_read_buffer(path, &len);
-	
-	if(idps == NULL)
+	if (idps == NULL)
 		return NULL;
-	
-	if(len != IDPS_LENGTH)
+
+	if (len != IDPS_LENGTH)
 	{
 		free(idps);
+		printf("[*] Error: Invalid IDPS of length %d. File should have been %d bytes.\n", len, IDPS_LENGTH);
 		return NULL;
 	}
-	
+
 	return idps;
+}
+
+s8 *_act_dat_file_path = NULL;
+
+export void set_act_dat_file_path(const s8 *file_in)
+{
+	// Create a duplicate of the input file, this technically leaks memory, but it doesnt matter for the intended usecase of this library
+	_act_dat_file_path = strdup(file_in);
 }
 
 static act_dat_t *act_dat_load()
 {
-	s8 *ps3 = NULL, path[256];
+	// s8 *ps3 = NULL, path[256];
 	act_dat_t *act_dat;
 	u32 len = 0;
-	
-	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-		if(access(ps3, 0) != 0)
-			ps3 = NULL;
 
-	if(ps3 != NULL)
-	{
-		sprintf(path, "%s/%s", ps3, CONFIG_ACT_DAT_FILE);
-		if(access(path, 0) != 0)
-			sprintf(path, "%s/%s", CONFIG_ACT_DAT_PATH, CONFIG_ACT_DAT_FILE);
-	}
-	else
-		sprintf(path, "%s/%s", CONFIG_ACT_DAT_PATH, CONFIG_ACT_DAT_FILE);
+	printf("[*] Info: Reading act.dat from path %s.\n", _act_dat_file_path);
 
-	act_dat = (act_dat_t *)_read_buffer(path, &len);
-	
-	if(act_dat == NULL)
+	act_dat = (act_dat_t *)_read_buffer(_act_dat_file_path, &len);
+
+	if (act_dat == NULL)
 		return NULL;
-	
-	if(len != ACT_DAT_LENGTH)
+
+	if (len != ACT_DAT_LENGTH)
 	{
 		free(act_dat);
+		printf("[*] Error: Invalid act.dat of length %d. File should have been %d bytes.\n", len, ACT_DAT_LENGTH);
 		return NULL;
 	}
-	
+
 	return act_dat;
+}
+
+s8 *_rif_file_path = NULL;
+
+export void set_rif_file_path(const s8 *file_in)
+{
+	// Create a duplicate of the input file, this technically leaks memory, but it doesnt matter for the intended usecase of this library
+	_rif_file_path = strdup(file_in);
 }
 
 static rif_t *rif_load(const s8 *content_id)
 {
-	s8 *ps3 = NULL, path[256];
+	// s8 *ps3 = NULL, path[256];
 	rif_t *rif;
 	u32 len = 0;
-	
-	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-		if(access(ps3, 0) != 0)
-			ps3 = NULL;
 
-	if(ps3 != NULL)
-	{
-		sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RIF_FILE_EXT);
-		if(access(path, 0) != 0)
-			sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
-	}
-	else
-		sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
+	// if ((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
+	// 	if (access(ps3, 0) != 0)
+	// 		ps3 = NULL;
 
-	rif = (rif_t *)_read_buffer(path, &len);
-	if(rif == NULL)
+	// if (ps3 != NULL)
+	// {
+	// 	sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RIF_FILE_EXT);
+	// 	if (access(path, 0) != 0)
+	// 		sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
+	// }
+	// else
+	// 	sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
+
+	rif = (rif_t *)_read_buffer(_rif_file_path, &len);
+	if (rif == NULL)
 		return NULL;
-	
-	if(len < RIF_LENGTH)
+
+	if (len < RIF_LENGTH)
 	{
 		free(rif);
 		return NULL;
 	}
-	
+
 	return rif;
 }
 
-export void rap_set_directory(s8 *file_in) {
-	rap_path = file_in;
+export void rap_set_directory(s8 *file_in)
+{
+	// Create a duplicate of the input, this technically leaks memory, but thats unlikely to ever be a real concern.
+	rap_path = strdup(file_in);
 }
 
 static u8 *rap_load(const s8 *content_id)
@@ -541,31 +546,31 @@ static u8 *rap_load(const s8 *content_id)
 	s8 *ps3 = NULL, path[256];
 	u8 *rap;
 	u32 len = 0;
-	
-	if((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-		if(access(ps3, 0) != 0)
+
+	if ((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
+		if (access(ps3, 0) != 0)
 			ps3 = NULL;
 
-	if(ps3 != NULL)
+	if (ps3 != NULL)
 	{
 		sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RAP_FILE_EXT);
-		if(access(path, 0) != 0)
+		if (access(path, 0) != 0)
 			sprintf(path, "%s/%s%s", rap_path, content_id, CONFIG_RAP_FILE_EXT);
 	}
 	else
 		sprintf(path, "%s/%s%s", rap_path, content_id, CONFIG_RAP_FILE_EXT);
 
 	rap = (u8 *)_read_buffer(path, &len);
-	
-	if(rap == NULL)
+
+	if (rap == NULL)
 		return NULL;
-	
-	if(len != RAP_LENGTH)
+
+	if (len != RAP_LENGTH)
 	{
 		free(rap);
 		return NULL;
 	}
-	
+
 	return rap;
 }
 
@@ -577,7 +582,7 @@ static BOOL rap_to_klicensee(const s8 *content_id, u8 *klicensee)
 	int i;
 
 	rap = rap_load(content_id);
-	if(rap == NULL)
+	if (rap == NULL)
 		return FALSE;
 
 	aes_setkey_dec(&aes_ctxt, rap_init_key, RAP_KEYBITS);
@@ -624,7 +629,7 @@ BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee)
 {
 	aes_context aes_ctxt;
 
-	if(rap_to_klicensee(content_id, klicensee) == FALSE)
+	if (rap_to_klicensee(content_id, klicensee) == FALSE)
 	{
 		keyset_t *ks_np_idps_const, *ks_np_rif_key;
 		rif_t *rif;
@@ -634,7 +639,7 @@ BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee)
 		u8 *idps;
 		act_dat_t *act_dat;
 
-		if((idps = idps_load()) == NULL)
+		if ((idps = idps_load()) == NULL)
 		{
 			printf("[*] Error: Could not load IDPS.\n");
 			return FALSE;
@@ -642,7 +647,7 @@ BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee)
 		else
 			_LOG_VERBOSE("IDPS loaded.\n");
 
-		if((act_dat = act_dat_load()) == NULL)
+		if ((act_dat = act_dat_load()) == NULL)
 		{
 			printf("[*] Error: Could not load act.dat.\n");
 			return FALSE;
@@ -651,16 +656,16 @@ BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee)
 			_LOG_VERBOSE("act.dat loaded.\n");
 
 		ks_np_idps_const = keyset_find_by_name(CONFIG_NP_IDPS_CONST_KNAME);
-		if(ks_np_idps_const == NULL)
+		if (ks_np_idps_const == NULL)
 			return FALSE;
 		memcpy(idps_const, ks_np_idps_const->erk, 0x10);
 
 		ks_np_rif_key = keyset_find_by_name(CONFIG_NP_RIF_KEY_KNAME);
-		if(ks_np_rif_key == NULL)
+		if (ks_np_rif_key == NULL)
 			return FALSE;
 
 		rif = rif_load(content_id);
-		if(rif == NULL)
+		if (rif == NULL)
 		{
 			printf("[*] Error: Could not obtain klicensee for '%s'.\n", content_id);
 			return FALSE;
@@ -670,7 +675,7 @@ BOOL klicensee_by_content_id(const s8 *content_id, u8 *klicensee)
 		aes_crypt_ecb(&aes_ctxt, AES_DECRYPT, rif->act_key_index, rif->act_key_index);
 
 		act_dat_key_index = _ES32(*(u32 *)(rif->act_key_index + 12));
-		if(act_dat_key_index > 127)
+		if (act_dat_key_index > 127)
 		{
 			printf("[*] Error: act.dat key index out of bounds.\n");
 			return FALSE;
@@ -701,7 +706,7 @@ keyset_t *keyset_from_buffer(u8 *keyset)
 {
 	keyset_t *ks;
 
-	if((ks = (keyset_t *)malloc(sizeof(keyset_t))) == NULL)
+	if ((ks = (keyset_t *)malloc(sizeof(keyset_t))) == NULL)
 		return NULL;
 
 	ks->erk = (u8 *)_memdup(keyset, 0x20);
@@ -710,7 +715,7 @@ keyset_t *keyset_from_buffer(u8 *keyset)
 	ks->rivlen = 0x10;
 	ks->pub = (u8 *)_memdup(keyset + 0x20 + 0x10, 0x28);
 	ks->priv = (u8 *)_memdup(keyset + 0x20 + 0x10 + 0x28, 0x15);
-	ks->ctype = (u8)*(keyset + 0x20 + 0x10 + 0x28 + 0x15);
+	ks->ctype = (u8) * (keyset + 0x20 + 0x10 + 0x28 + 0x15);
 
 	return ks;
 }

@@ -11,60 +11,60 @@ pub fn build(b: *std.Build) void {
 
     var package_step = b.step("package", "Packages scetool for all platforms");
 
-    const package_targets: []const std.zig.CrossTarget = &.{
-        std.zig.CrossTarget{
+    const package_targets: []const std.Build.ResolvedTarget = &.{
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .abi = .gnu,
             .glibc_version = .{
                 .major = 2,
-                .minor = 13,
+                .minor = 17,
                 .patch = 0,
             },
             .cpu_arch = .x86_64,
             .os_tag = .linux,
-        },
-        std.zig.CrossTarget{
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .abi = .gnu,
             .glibc_version = .{
                 .major = 2,
-                .minor = 13,
+                .minor = 17,
                 .patch = 0,
             },
             .cpu_arch = .aarch64,
             .os_tag = .linux,
-        },
-        std.zig.CrossTarget{
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .aarch64,
             .os_tag = .windows,
-        },
-        std.zig.CrossTarget{
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .x86_64,
             .os_tag = .windows,
-        },
-        std.zig.CrossTarget{
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .aarch64,
             .os_tag = .macos,
-        },
-        std.zig.CrossTarget{
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .x86_64,
             .os_tag = .macos,
-        },
+        }),
     };
 
     for (package_targets) |package_target| {
         const package = createSceTool(b, package_target, .ReleaseSmall);
 
-        const dotnet_os = switch (package_target.os_tag.?) {
+        const dotnet_os = switch (package_target.result.os.tag) {
             .linux => "linux",
             .macos => "osx",
             .windows => "win",
             else => @panic("unknown os, sorry"),
         };
-        const dotnet_arch = switch (package_target.cpu_arch.?) {
+        const dotnet_arch = switch (package_target.result.cpu.arch) {
             .x86_64 => "x64",
             .aarch64 => "arm64",
             else => @panic("unknown arch, sorry"),
         };
-        const final_name = switch (package_target.os_tag.?) {
+        const final_name = switch (package_target.result.os.tag) {
             .linux => "libscetool.so",
             .windows => "scetool.dll",
             .macos => "libscetool.dylib",
@@ -77,10 +77,10 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-fn createSceTool(b: *std.Build, target: std.zig.CrossTarget, optimize: std.builtin.OptimizeMode) *std.build.Step.Compile {
+fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
     const zlib = createZlib(b, target, optimize);
 
-    const shared_lib_options: std.build.SharedLibraryOptions = .{
+    const shared_lib_options: std.Build.SharedLibraryOptions = .{
         .name = "scetool",
         .target = target,
         .optimize = optimize,
@@ -94,7 +94,7 @@ fn createSceTool(b: *std.Build, target: std.zig.CrossTarget, optimize: std.built
     scetool.addCSourceFiles(.{ .files = scetool_srcs });
 
     if (optimize != .Debug)
-        scetool.strip = true;
+        scetool.root_module.strip = true;
 
     return scetool;
 }
@@ -107,7 +107,7 @@ const root_path = root() ++ "/";
 
 pub const zlib_include_dir = root_path ++ "zlib";
 
-pub fn createZlib(b: *std.build.Builder, target: std.zig.CrossTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
+pub fn createZlib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
     var zlib = b.addStaticLibrary(.{
         .name = "z",
         .target = target,
