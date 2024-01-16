@@ -505,24 +505,24 @@ export void set_rif_file_path(const s8 *file_in)
 
 static rif_t *rif_load(const s8 *content_id)
 {
-	// s8 *ps3 = NULL, path[256];
+	s8 *ps3 = NULL, path[FILENAME_MAX];
 	rif_t *rif;
 	u32 len = 0;
 
-	// if ((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
-	// 	if (access(ps3, 0) != 0)
-	// 		ps3 = NULL;
+	if ((ps3 = getenv(CONFIG_ENV_PS3)) != NULL)
+		if (access(ps3, 0) != 0)
+			ps3 = NULL;
 
-	// if (ps3 != NULL)
-	// {
-	// 	sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RIF_FILE_EXT);
-	// 	if (access(path, 0) != 0)
-	// 		sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
-	// }
-	// else
-	// 	sprintf(path, "%s/%s%s", CONFIG_RIF_PATH, content_id, CONFIG_RIF_FILE_EXT);
+	if (ps3 != NULL)
+	{
+		sprintf(path, "%s/%s%s", ps3, content_id, CONFIG_RIF_FILE_EXT);
+		if (access(path, 0) != 0)
+			sprintf(path, "%s/%s%s", _rif_file_path, content_id, CONFIG_RIF_FILE_EXT);
+	}
+	else
+		sprintf(path, "%s/%s%s", _rif_file_path, content_id, CONFIG_RIF_FILE_EXT);
 
-	rif = (rif_t *)_read_buffer(_rif_file_path, &len);
+	rif = (rif_t *)_read_buffer(path, &len);
 	if (rif == NULL)
 		return NULL;
 
