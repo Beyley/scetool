@@ -434,34 +434,28 @@ curve_t *vsh_curve_find(u8 ctype)
 	return &_tmp_curve;
 }
 
-s8 *_idps_file_path = NULL;
+u8 *_idps_key = NULL;
 
-export void set_idps_file_path(const s8 *file_in)
+export void set_idps_key(const u8 *key_in)
 {
-	// Create a duplicate of the input file, this technically leaks memory, but it doesnt matter for the intended usecase of this library
-	_idps_file_path = strdup(file_in);
+	u8 *key = NULL;
+
+	// Allocate the new key if its not already allocated
+	if (key == NULL)
+		key = (u8 *)malloc(IDPS_LENGTH);
+	else
+		key = _idps_key;
+
+	// Copy the key into the buffer
+	memcpy(key, key_in, IDPS_LENGTH);
+
+	// Set the key
+	_idps_key = key;
 }
 
 static u8 *idps_load()
 {
-	u8 *idps;
-	u32 len = 0;
-
-	printf("[*] Info: Reading IDPS from path %s.\n", _idps_file_path);
-
-	idps = (u8 *)_read_buffer(_idps_file_path, &len);
-
-	if (idps == NULL)
-		return NULL;
-
-	if (len != IDPS_LENGTH)
-	{
-		free(idps);
-		printf("[*] Error: Invalid IDPS of length %d. File should have been %d bytes.\n", len, IDPS_LENGTH);
-		return NULL;
-	}
-
-	return idps;
+	return _idps_key;
 }
 
 s8 *_act_dat_file_path = NULL;
