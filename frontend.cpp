@@ -357,7 +357,84 @@ static BOOL _fill_npdrm_config(self_config_t *sconf)
 	return TRUE;
 }
 
-export void frontend_print_infos(s8 *file)
+export u8 *get_content_id(s8 const *file)
+{
+	u8 *buf = _read_buffer(file, NULL);
+	if (buf != NULL)
+	{
+		sce_buffer_ctxt_t *ctxt = sce_create_ctxt_from_buffer(buf);
+		if (ctxt != NULL)
+		{
+			u8 *meta_info = NULL;
+			if (_meta_info != NULL)
+			{
+				if (strlen(_meta_info) != 0x40 * 2)
+				{
+					printf("[*] Error: Metadata info needs to be 64 bytes.\n");
+					return NULL;
+				}
+				meta_info = _x_to_u8_buffer(_meta_info);
+			}
+
+			u8 *keyset = NULL;
+			if (_keyset != NULL)
+			{
+				if (strlen(_keyset) != (0x20 + 0x10 + 0x15 + 0x28 + 0x01) * 2)
+				{
+					printf("[*] Error: Keyset has a wrong length.\n");
+					return NULL;
+				}
+				keyset = _x_to_u8_buffer(_keyset);
+			}
+
+			if (sce_decrypt_header(ctxt, meta_info, keyset))
+			{
+				_LOG_VERBOSE("Header decrypted.\n");
+				if (sce_decrypt_data(ctxt))
+					_LOG_VERBOSE("Data decrypted.\n");
+				else
+					printf("[*] Warning: Could not decrypt data.\n");
+			}
+			else
+				printf("[*] Warning: Could not decrypt header.\n");
+
+			if (ctxt->sceh->header_type != SCE_HEADER_TYPE_SELF)
+			{
+				printf("[*] Error: Not a SELF file.\n");
+			}
+			else
+			{
+				// Iterate over all the items and find the NPDRM one.
+				if (ctxt->self.cis != NULL)
+					LIST_FOREACH(iter, ctxt->self.cis)
+					{
+						control_info_t *ci = (control_info_t *)iter->value;
+
+						if (ci->type == CONTROL_INFO_TYPE_NPDRM)
+						{
+							ci_data_npdrm_t *np = (ci_data_npdrm_t *)((u8 *)ci + sizeof(control_info_t));
+
+							// Copy the content ID.
+							u8 *content_id = (u8 *)malloc(0x30);
+							memcpy(content_id, np->content_id, 0x30);
+							return content_id;
+						}
+					}
+			}
+
+			free(ctxt);
+		}
+		else
+			printf("[*] Error: Could not process %s\n", file);
+		free(buf);
+	}
+	else
+		printf("[*] Error: Could not load %s\n", file);
+
+	return NULL;
+}
+
+export void frontend_print_infos(s8 const *file)
 {
 	u8 *buf = _read_buffer(file, NULL);
 	if (buf != NULL)
