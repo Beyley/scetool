@@ -49,8 +49,6 @@ list_t *_keysets;
 curve_t *_curves;
 /*! Loaded VSH curves. */
 vsh_curve_t *_vsh_curves;
-/*! Path to rap directory. */
-static s8 *rap_path = CONFIG_RAP_PATH;
 
 static u8 rap_init_key[0x10] =
 	{
@@ -529,10 +527,16 @@ static rif_t *rif_load(const s8 *content_id)
 	return rif;
 }
 
+/*! Path to rap directory. */
+static s8 *rap_path = NULL;
+
 export void rap_set_directory(s8 *file_in)
 {
-	// Create a duplicate of the input, this technically leaks memory, but thats unlikely to ever be a real concern.
-	rap_path = strdup(file_in);
+	if (rap_path != NULL)
+		free(rap_path);
+
+	rap_path = (s8 *)malloc(strlen(file_in) + 1);
+	strcpy(rap_path, file_in);
 }
 
 static u8 *rap_load(const s8 *content_id)
