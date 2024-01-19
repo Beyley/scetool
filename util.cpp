@@ -60,7 +60,7 @@ u8 *_read_buffer(const s8 *file, u32 *length)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
-	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len * sizeof(wchar_t));
 	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"rb")) == NULL)
@@ -93,7 +93,7 @@ int _write_buffer(const s8 *file, u8 *buffer, u32 length)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
-	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len * sizeof(wchar_t));
 	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)

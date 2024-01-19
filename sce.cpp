@@ -796,7 +796,7 @@ BOOL sce_write_ctxt(sce_buffer_ctxt_t *ctxt, s8 *fname)
 
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, fname, -1, NULL, 0);
-	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
+	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len * sizeof(wchar_t));
 	MultiByteToWideChar(CP_UTF8, 0, fname, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
