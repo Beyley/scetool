@@ -55,6 +55,9 @@ u8 *_read_buffer(const s8 *file, u32 *length)
 	FILE *fp;
 	u32 size;
 
+	if (file == NULL)
+		return NULL;
+
 #ifdef _WIN32
 	int utf16Len = MultiByteToWideChar(CP_UTF8, 0, file, -1, NULL, 0);
 	wchar_t *fileWideStr = (wchar_t *)malloc(utf16Len);
@@ -255,15 +258,22 @@ u64 _x_to_u64(const s8 *hex)
 
 u8 *_x_to_u8_buffer(const s8 *hex)
 {
+	// The length of the hex string
 	u32 len = strlen(hex);
+	// The temporary buffer
 	s8 xtmp[3] = {0, 0, 0};
 
-	// Must be aligned to 2.
+	// Data must be aligned to 2.
 	if (len % 2 != 0)
 		return NULL;
 
-	u8 *res = (u8 *)malloc(sizeof(u8) * len);
+	// The result data output
+	u8 *res = (u8 *)malloc(sizeof(u8) * len / 2);
+	// The working pointer
 	u8 *ptr = res;
+
+	// Half the length to check, so we dont read out of bounds
+	len /= 2;
 
 	while (len--)
 	{
