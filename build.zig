@@ -153,7 +153,7 @@ const scetool_srcs = &.{
     root_path ++ "tables.cpp",
     root_path ++ "util.cpp",
     root_path ++ "spp.cpp",
-    root_path ++ "main.cpp",
+    root_path ++ "scetool_main.cpp",
     root_path ++ "aes.c",
     root_path ++ "sha1.c",
 };

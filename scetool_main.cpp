@@ -1,7 +1,7 @@
 /*
-* Copyright (c) 2011-2013 by naehrwert
-* This file is released under the GPLv2.
-*/
+ * Copyright (c) 2011-2013 by naehrwert
+ * This file is released under the GPLv2.
+ */
 
 #define CLI_APP 1
 
@@ -110,7 +110,7 @@ static s8 *_file_out = NULL;
 #define VAL_REAL_FNAME 'g'
 #define VAL_ADD_SIG 'j'
 
-// static struct option options[] = 
+// static struct option options[] =
 // {
 // 	{"help", ARG_NONE, NULL, 'h'},
 // 	{"print-keys", ARG_NONE, NULL, 'k'},
@@ -150,7 +150,7 @@ static void print_version()
 {
 	printf("scetool " SCETOOL_VERSION " (C) 2011-2013 by naehrwert\n");
 	printf("NP local license handling (C) 2012 by flatz\n");
-	//printf("[Build Date/Time: %s/%s]\n", __DATE__, __TIME__);
+	// printf("[Build Date/Time: %s/%s]\n", __DATE__, __TIME__);
 }
 
 #include <time.h>
@@ -357,12 +357,12 @@ export int libscetool_init()
 	print_version();
 	printf("\n");
 
-	//Load keysets.
-	if(keys_load() == TRUE)
+	// Load keysets.
+	if (keys_load() == TRUE)
 		_LOG_VERBOSE("Loaded keysets.\n");
 	else
 	{
-		if(_list_keys == TRUE)
+		if (_list_keys == TRUE)
 		{
 			printf("[*] Error: Could not load keys.\n");
 			return 0;
@@ -371,22 +371,22 @@ export int libscetool_init()
 			printf("[*] Warning: Could not load keys.\n");
 	}
 
-	//Load curves.
-	if(curves_load() == TRUE)
+	// Load curves.
+	if (curves_load() == TRUE)
 		_LOG_VERBOSE("Loaded loader curves.\n");
 	else
 		printf("[*] Warning: Could not load loader curves.\n");
 
-	//Load vsh curves.
-	if(vsh_curves_load() == TRUE)
+	// Load vsh curves.
+	if (vsh_curves_load() == TRUE)
 		_LOG_VERBOSE("Loaded vsh curves.\n");
 	else
 		printf("[*] Warning: Could not load vsh curves.\n");
 
-	//Set klicensee.
-	if(_klicensee != NULL)
+	// Set klicensee.
+	if (_klicensee != NULL)
 	{
-		if(strlen(_klicensee) != 0x10*2)
+		if (strlen(_klicensee) != 0x10 * 2)
 		{
 			printf("[*] Error: klicensee needs to be 16 bytes.\n");
 			return 1;

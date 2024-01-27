@@ -35,8 +35,10 @@ typedef unsigned long long int u64;
 #define BITS2BYTES(x) ((x) / 8)
 #define BYTES2BITS(x) ((x) * 8)
 
-#if defined(__x86_64__) || defined(__aarch64__)
+#if defined(__x86_64__) || defined(__aarch64__) || __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define LITTLE_ENDIAN 1
+#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#undef LITTLE_ENDIAN
 #else
 #error "Unknown platform"
 #endif
