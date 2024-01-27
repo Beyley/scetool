@@ -31,7 +31,7 @@
 void _print_sce_header(FILE *fp, sce_header_t *h)
 {
 	const s8 *name;
-	const s8 *key_revision;
+	// const s8 *key_revision;
 
 	fprintf(fp, "[*] SCE Header:\n");
 	fprintf(fp, " Magic           0x%08X [%s]\n", h->magic, (h->magic == SCE_HEADER_MAGIC ? "OK" : "ERROR"));
@@ -359,7 +359,7 @@ static u32 _sce_get_oh_len(sce_buffer_ctxt_t *ctxt)
 
 void _sce_fixup_ctxt(sce_buffer_ctxt_t *ctxt)
 {
-	u32 i = 0, base_off, last_off;
+	u32 i = 0, base_off, last_off = 0;
 
 	// Set section info data.
 	base_off = ctxt->sceh->header_len;

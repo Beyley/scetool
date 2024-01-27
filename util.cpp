@@ -97,12 +97,12 @@ int _write_buffer(const s8 *file, u8 *buffer, u32 length)
 	MultiByteToWideChar(CP_UTF8, 0, file, -1, fileWideStr, utf16Len);
 
 	if ((fp = _wfopen(fileWideStr, L"wb")) == NULL)
-		return NULL;
+		return 0;
 
 	free(fileWideStr);
 #else
 	if ((fp = fopen(file, "wb")) == NULL)
-		return NULL;
+		return 0;
 #endif
 
 	/**/

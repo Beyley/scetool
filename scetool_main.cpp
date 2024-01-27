@@ -43,15 +43,15 @@ BOOL _verbose = FALSE;
 BOOL _raw = FALSE;
 
 /*! We got work. */
-static BOOL _got_work = FALSE;
-/*! List keys. */
+// static BOOL _got_work = FALSE;
+// /*! List keys. */
 static BOOL _list_keys = FALSE;
-/*! Print infos on file. */
-static BOOL _print_info = FALSE;
-/*! Decrypt file. */
-static BOOL _decrypt_file = FALSE;
-/*! Encrypt file. */
-static BOOL _encrypt_file = FALSE;
+// /*! Print infos on file. */
+// static BOOL _print_info = FALSE;
+// /*! Decrypt file. */
+// static BOOL _decrypt_file = FALSE;
+// /*! Encrypt file. */
+// static BOOL _encrypt_file = FALSE;
 
 /*! Parameters. */
 s8 *_template = NULL;
@@ -80,9 +80,9 @@ s8 *_real_fname = NULL;
 s8 *_add_sig = NULL;
 
 /*! Input file. */
-static s8 *_file_in = NULL;
+// static s8 *_file_in = NULL;
 /*! Ouput file. */
-static s8 *_file_out = NULL;
+// static s8 *_file_out = NULL;
 
 /*! Long option values. */
 #define VAL_TEMPLATE 't'
