@@ -155,51 +155,51 @@ static void print_version()
 
 #include <time.h>
 
-static void print_usage()
-{
-	print_version();
+// static void print_usage()
+// {
+// 	print_version();
 
-	printf("USAGE: scetool [options] command\n");
-	printf("COMMANDS                Parameters            Explanation\n");
-	printf(" -h, --help                                   Print this help.\n");
-	printf(" -k, --print-keys                             List keys.\n");
-	printf(" -i, --print-infos      File-in               Print SCE file info.\n");
-	printf(" -d, --decrypt          File-in File-out      Decrypt/dump SCE file.\n");
-	printf(" -e, --encrypt          File-in File-out      Encrypt/create SCE file.\n");
-	printf("OPTIONS                 Possible Values       Explanation\n");
-	printf(" -v, --verbose                                Enable verbose output.\n");
-	printf(" -r, --raw                                    Enable raw value output.\n");
-	printf(" -t, --template         File-in               Template file (SELF only)\n");
-	printf(" -0, --sce-type         SELF/RVK/PKG/SPP      SCE File Type\n");
-	printf(" -1, --compress-data    TRUE/FALSE(default)   Whether to compress data or not.\n");
-	printf(" -s, --skip-sections    TRUE(default)/FALSE   Whether to skip sections or not.\n");
-	printf(" -2, --key-revision     e.g. 00,01,...,0A,... Key Revision\n");
-	printf(" -m, --meta-info        64 bytes              Use provided meta info to decrypt.\n");
-	printf(" -K, --keyset           32(Key)16(IV)\n");
-	printf("                        40(Pub)21(Priv)1(CT)  Override keyset.\n");
-	printf(" -3, --self-auth-id     e.g. 1010000001000003 Authentication ID\n");
-	printf(" -4, --self-vendor-id   e.g. 01000002         Vendor ID\n");
-	printf(" -5, --self-type        LV0/LV1/LV2/APP/ISO/\n");
-	printf("                        LDR/NPDRM             SELF Type\n");
-	printf(" -A, --self-app-version e.g. 0001000000000000 Application Version\n");
-	printf(" -6, --self-fw-version  e.g. 0003004100000000 Firmware Version\n");
-	printf(" -7, --self-add-shdrs   TRUE(default)/FALSE   Whether to add ELF shdrs or not.\n");
-	printf(" -8, --self-ctrl-flags  32 bytes              Override control flags.\n");
-	printf(" -9, --self-cap-flags   32 bytes              Override capability flags.\n");
-#ifdef CONFIG_CUSTOM_INDIV_SEED
-	printf(" -a, --self-indiv-seed  256 bytes             Individuals Seed (ISO only)\n");
-#endif
-	printf(" -b, --np-license-type  LOCAL/FREE            License Type\n");
-	printf(" -c, --np-app-type      SPRX/EXEC/USPRX/UEXEC App Type (U* for updates)\n");
-	printf(" -f, --np-content-id                          Content ID\n");
-	printf(" -l, --np-klicensee     16 bytes              Override klicensee.\n");
-	printf(" -g, --np-real-fname    e.g. EBOOT.BIN        Real Filename\n");
-	printf(" -j, --np-add-sig       TRUE/FALSE(default)   Whether to add a NP sig. or not.\n");
+// 	printf("USAGE: scetool [options] command\n");
+// 	printf("COMMANDS                Parameters            Explanation\n");
+// 	printf(" -h, --help                                   Print this help.\n");
+// 	printf(" -k, --print-keys                             List keys.\n");
+// 	printf(" -i, --print-infos      File-in               Print SCE file info.\n");
+// 	printf(" -d, --decrypt          File-in File-out      Decrypt/dump SCE file.\n");
+// 	printf(" -e, --encrypt          File-in File-out      Encrypt/create SCE file.\n");
+// 	printf("OPTIONS                 Possible Values       Explanation\n");
+// 	printf(" -v, --verbose                                Enable verbose output.\n");
+// 	printf(" -r, --raw                                    Enable raw value output.\n");
+// 	printf(" -t, --template         File-in               Template file (SELF only)\n");
+// 	printf(" -0, --sce-type         SELF/RVK/PKG/SPP      SCE File Type\n");
+// 	printf(" -1, --compress-data    TRUE/FALSE(default)   Whether to compress data or not.\n");
+// 	printf(" -s, --skip-sections    TRUE(default)/FALSE   Whether to skip sections or not.\n");
+// 	printf(" -2, --key-revision     e.g. 00,01,...,0A,... Key Revision\n");
+// 	printf(" -m, --meta-info        64 bytes              Use provided meta info to decrypt.\n");
+// 	printf(" -K, --keyset           32(Key)16(IV)\n");
+// 	printf("                        40(Pub)21(Priv)1(CT)  Override keyset.\n");
+// 	printf(" -3, --self-auth-id     e.g. 1010000001000003 Authentication ID\n");
+// 	printf(" -4, --self-vendor-id   e.g. 01000002         Vendor ID\n");
+// 	printf(" -5, --self-type        LV0/LV1/LV2/APP/ISO/\n");
+// 	printf("                        LDR/NPDRM             SELF Type\n");
+// 	printf(" -A, --self-app-version e.g. 0001000000000000 Application Version\n");
+// 	printf(" -6, --self-fw-version  e.g. 0003004100000000 Firmware Version\n");
+// 	printf(" -7, --self-add-shdrs   TRUE(default)/FALSE   Whether to add ELF shdrs or not.\n");
+// 	printf(" -8, --self-ctrl-flags  32 bytes              Override control flags.\n");
+// 	printf(" -9, --self-cap-flags   32 bytes              Override capability flags.\n");
+// #ifdef CONFIG_CUSTOM_INDIV_SEED
+// 	printf(" -a, --self-indiv-seed  256 bytes             Individuals Seed (ISO only)\n");
+// #endif
+// 	printf(" -b, --np-license-type  LOCAL/FREE            License Type\n");
+// 	printf(" -c, --np-app-type      SPRX/EXEC/USPRX/UEXEC App Type (U* for updates)\n");
+// 	printf(" -f, --np-content-id                          Content ID\n");
+// 	printf(" -l, --np-klicensee     16 bytes              Override klicensee.\n");
+// 	printf(" -g, --np-real-fname    e.g. EBOOT.BIN        Real Filename\n");
+// 	printf(" -j, --np-add-sig       TRUE/FALSE(default)   Whether to add a NP sig. or not.\n");
 
-	// getchar();
+// 	// getchar();
 
-	exit(1);
-}
+// 	exit(1);
+// }
 
 // static void parse_args(int argc, char **argv)
 // {

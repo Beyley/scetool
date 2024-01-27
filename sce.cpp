@@ -863,7 +863,7 @@ BOOL sce_decrypt_header(sce_buffer_ctxt_t *ctxt, u8 *metadata_info, u8 *keyset)
 	else
 	{
 		// Copy provided metadata info over SELF metadata.
-		memcpy((u8 *)ctxt->metai, metadata_info, sizeof(metadata_info));
+		memcpy((u8 *)ctxt->metai, metadata_info, sizeof(metadata_info_t));
 	}
 
 	if (ctxt->metai->key_pad[0] != 0x00 || ctxt->metai->iv_pad[0] != 0x00)
