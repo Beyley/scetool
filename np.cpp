@@ -62,28 +62,43 @@ BOOL np_decrypt_npdrm(sce_buffer_ctxt_t *ctxt)
 	ci_data_npdrm_t *np;
 
 	if ((np = _sce_find_ci_npdrm(ctxt)) == NULL)
+	{
+		printf("No NPDRM control info found!\n");
 		return FALSE;
+	}
 
 	// Try to find keysets.
 	ks_klic_key = keyset_find_by_name(CONFIG_NP_KLIC_KEY_KNAME);
 	if (ks_klic_key == NULL)
+	{
+		printf("No NPDRM klicense keyset found!\n");
 		return FALSE;
+	}
 	if (_klicensee_key != NULL)
 		memcpy(npdrm_key, _klicensee_key, 0x10);
 	else if (np->license_type == NP_LICENSE_FREE)
 	{
 		ks_np_klic_free = keyset_find_by_name(CONFIG_NP_KLIC_FREE_KNAME);
 		if (ks_np_klic_free == NULL)
+		{
+			printf("No NPDRM klicense free keyset found!\n");
 			return FALSE;
+		}
 		memcpy(npdrm_key, ks_np_klic_free->erk, 0x10);
 	}
 	else if (np->license_type == NP_LICENSE_LOCAL)
 	{
 		if ((klicensee_by_content_id((s8 *)np->content_id, npdrm_key)) == FALSE)
+		{
+			printf("No klicensee found for content id %s!\n", np->content_id);
 			return FALSE;
+		}
 	}
 	else
+	{
+		printf("Unsupported NPDRM license type!\n");
 		return FALSE;
+	}
 
 	aes_setkey_dec(&aes_ctxt, ks_klic_key->erk, METADATA_INFO_KEYBITS);
 	aes_crypt_ecb(&aes_ctxt, AES_DECRYPT, npdrm_key, npdrm_key);

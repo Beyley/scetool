@@ -840,7 +840,10 @@ BOOL sce_decrypt_header(sce_buffer_ctxt_t *ctxt, u8 *metadata_info, u8 *keyset)
 		{
 			// Try to find keyset.
 			if ((ks = keyset_find(ctxt)) == NULL)
+			{
+				printf("[*] Error: Could not find keyset\n");
 				return FALSE;
+			}
 
 			_LOG_VERBOSE("Using keyset [%s 0x%04X %s]\n", ks->name, ks->key_revision, sce_version_to_str(ks->version));
 		}
@@ -853,7 +856,10 @@ BOOL sce_decrypt_header(sce_buffer_ctxt_t *ctxt, u8 *metadata_info, u8 *keyset)
 		// Remove NPDRM layer.
 		if (ctxt->sceh->header_type == SCE_HEADER_TYPE_SELF && ctxt->self.ai->self_type == SELF_TYPE_NPDRM)
 			if (np_decrypt_npdrm(ctxt) == FALSE)
+			{
+				printf("[*] Error: Could not remove NPDRM layer\n");
 				return FALSE;
+			}
 
 		// Decrypt metadata info.
 		aes_setkey_dec(&aes_ctxt, ks->erk, KEYBITS(ks->erklen));
@@ -867,7 +873,10 @@ BOOL sce_decrypt_header(sce_buffer_ctxt_t *ctxt, u8 *metadata_info, u8 *keyset)
 	}
 
 	if (ctxt->metai->key_pad[0] != 0x00 || ctxt->metai->iv_pad[0] != 0x00)
+	{
+		printf("[*] Warning: Metadata info padding is not zero\n");
 		return FALSE;
+	}
 
 	// Decrypt metadata header, metadata section headers and keys.
 	nc_off = 0;
