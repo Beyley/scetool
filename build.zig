@@ -33,6 +33,16 @@ pub fn build(b: *std.Build) void {
             .os_tag = .linux,
         }),
         std.Build.resolveTargetQuery(b, std.Target.Query{
+            .abi = .gnueabihf,
+            .glibc_version = .{
+                .major = 2,
+                .minor = 17,
+                .patch = 0,
+            },
+            .cpu_arch = .arm,
+            .os_tag = .linux,
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .aarch64,
             .os_tag = .windows,
         }),
@@ -61,6 +71,7 @@ pub fn build(b: *std.Build) void {
         };
         const dotnet_arch = switch (package_target.result.cpu.arch) {
             .x86_64 => "x64",
+            .arm => "arm32",
             .aarch64 => "arm64",
             else => @panic("unknown arch, sorry"),
         };
@@ -89,7 +100,7 @@ fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
     const scetool: *std.Build.Step.Compile = b.addSharedLibrary(shared_lib_options);
     scetool.linkLibCpp();
     scetool.linkLibrary(zlib);
-    scetool.addIncludePath(.{ .path = zlib_include_dir });
+    scetool.addIncludePath(b.path(zlib_include_dir));
 
     scetool.addCSourceFiles(.{ .files = scetool_srcs });
 
