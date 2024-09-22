@@ -5,7 +5,7 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const scetool = createSceTool(b, target, optimize, null);
+    const scetool = createSceTool(b, target, optimize, null, null);
 
     b.installArtifact(scetool);
 
@@ -74,6 +74,20 @@ pub fn build(b: *std.Build) !void {
         //     .os_tag = .linux,
         //     .abi = .android,
         // }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .aarch64,
+            .os_tag = .ios,
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .x86_64,
+            .os_tag = .ios,
+            .abi = .simulator,
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .aarch64,
+            .os_tag = .ios,
+            .abi = .simulator,
+        }),
     };
 
     const android_version = 21;
@@ -85,7 +99,18 @@ pub fn build(b: *std.Build) !void {
     else
         "/opt/android-ndk";
 
+    const ios_sdk_root = b.option([]const u8, "ios_sdk_root", "The root of the iOS SDK");
+    const ios_simulator_sdk_root = b.option([]const u8, "ios_simulator_sdk_root", "The root of the iOS simulator SDK");
+
     for (package_targets) |package_target| {
+        // If the iOS SDK root is not provided, skip iOS builds
+        if (package_target.result.os.tag == .ios and ios_sdk_root == null)
+            continue;
+
+        // If the iOS simulator SDK root is not provided, skip the iOS simulator builds
+        if (package_target.result.abi == .simulator and ios_simulator_sdk_root == null)
+            continue;
+
         const libc = if (package_target.result.abi == .android) blk: {
             const android_triple = switch (package_target.result.cpu.arch) {
                 .x86_64 => "x86_64-linux-android",
@@ -112,7 +137,35 @@ pub fn build(b: *std.Build) !void {
             }) catch unreachable;
             const system_include_dir = std.fs.path.resolve(b.allocator, &[_][]const u8{ include_dir, android_triple }) catch unreachable;
 
-            break :blk try createLibCFile(b, android_version, @tagName(package_target.result.cpu.arch), include_dir, system_include_dir, lib_dir);
+            break :blk try createLibCFile(
+                b,
+                b.fmt("android-{d}-{s}.conf", .{ android_version, @tagName(package_target.result.cpu.arch) }),
+                include_dir,
+                system_include_dir,
+                lib_dir,
+            );
+        } else if (package_target.result.os.tag == .ios) blk: {
+            const lib_dir = try std.fs.path.resolve(b.allocator, &.{ ios_sdk_root.?, "usr", "lib" });
+            const include_dir = try std.fs.path.resolve(b.allocator, &.{ ios_sdk_root.?, "usr", "include" });
+
+            break :blk try createLibCFile(
+                b,
+                b.fmt("ios-{s}.conf", .{@tagName(package_target.result.cpu.arch)}),
+                include_dir,
+                include_dir,
+                lib_dir,
+            );
+        } else if (package_target.result.abi == .simulator) blk: {
+            const lib_dir = try std.fs.path.resolve(b.allocator, &.{ ios_simulator_sdk_root.?, "usr", "lib" });
+            const include_dir = try std.fs.path.resolve(b.allocator, &.{ ios_simulator_sdk_root.?, "usr", "include" });
+
+            break :blk try createLibCFile(
+                b,
+                b.fmt("ios-simulator-{s}.conf", .{@tagName(package_target.result.cpu.arch)}),
+                include_dir,
+                include_dir,
+                lib_dir,
+            );
         } else null;
 
         const package = createSceTool(
@@ -120,6 +173,12 @@ pub fn build(b: *std.Build) !void {
             package_target,
             .ReleaseSmall,
             libc,
+            if (package_target.result.os.tag == .ios)
+                try std.fs.path.resolve(b.allocator, &.{ ios_sdk_root.?, "usr", "lib" })
+            else if (package_target.result.abi == .simulator)
+                try std.fs.path.resolve(b.allocator, &.{ ios_simulator_sdk_root.?, "usr", "lib" })
+            else
+                null,
         );
 
         const dotnet_os = if (package_target.result.abi == .android)
@@ -128,6 +187,7 @@ pub fn build(b: *std.Build) !void {
             .linux => "linux",
             .macos => "osx",
             .windows => "win",
+            .ios => "ios",
             else => @panic("unknown os, sorry"),
         };
         const dotnet_arch = switch (package_target.result.cpu.arch) {
@@ -140,6 +200,7 @@ pub fn build(b: *std.Build) !void {
             .linux => "libscetool.so",
             .windows => "scetool.dll",
             .macos => "libscetool.dylib",
+            .ios => "libscetool.a", // we build static libraries on iOS
             else => @panic("unknown os, sorry"),
         };
 
@@ -153,9 +214,7 @@ pub fn androidToolchainHostTag() []const u8 {
     return @tagName(builtin.os.tag) ++ "-" ++ @tagName(builtin.cpu.arch);
 }
 
-fn createLibCFile(b: *std.Build, android_version: comptime_int, folder_name: []const u8, include_dir: []const u8, sys_include_dir: []const u8, crt_dir: []const u8) !std.Build.LazyPath {
-    const fname = b.fmt("android-{d}-{s}.conf", .{ android_version, folder_name });
-
+fn createLibCFile(b: *std.Build, file_name: []const u8, include_dir: []const u8, sys_include_dir: []const u8, crt_dir: []const u8) !std.Build.LazyPath {
     var contents = std.ArrayList(u8).init(b.allocator);
     errdefer contents.deinit();
 
@@ -176,21 +235,31 @@ fn createLibCFile(b: *std.Build, android_version: comptime_int, folder_name: []c
     try writer.writeAll("gcc_dir=\n");
 
     const step = b.addWriteFiles();
-    return step.add(fname, contents.items);
+    return step.add(file_name, contents.items);
 }
 
-fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, libc_file: ?std.Build.LazyPath) *std.Build.Step.Compile {
-    const zlib = createZlib(b, target, optimize, libc_file);
-
-    const shared_lib_options: std.Build.SharedLibraryOptions = .{
+fn createSceTool(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    libc_file: ?std.Build.LazyPath,
+    ios_lib_dir: ?[]const u8,
+) *std.Build.Step.Compile {
+    const lib_options = .{
         .name = "scetool",
         .target = target,
         .optimize = optimize,
     };
 
-    const scetool: *std.Build.Step.Compile = b.addSharedLibrary(shared_lib_options);
+    const scetool: *std.Build.Step.Compile = if (target.result.os.tag == .ios) b.addStaticLibrary(lib_options) else b.addSharedLibrary(lib_options);
     scetool.linkLibCpp();
-    scetool.linkLibrary(zlib);
+    if (target.result.os.tag != .ios) {
+        const zlib = createZlib(b, target, optimize, libc_file);
+        scetool.linkLibrary(zlib);
+    } else {
+        scetool.addLibraryPath(.{ .cwd_relative = ios_lib_dir.? });
+        scetool.linkSystemLibrary("z");
+    }
     scetool.addIncludePath(b.path(zlib_include_dir));
     scetool.setLibCFile(libc_file);
     if (libc_file) |libc|
