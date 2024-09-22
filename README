@@ -2,7 +2,7 @@ scetool (C) 2011-2013 by naehrwert
 NP local license handling (C) 2012 by flatz
 
 ==> Compilation <==
-Install Zig 0.14.0-dev.1298+d9e8671d9
+Install Zig 0.14.0-dev.1632+d83a3f174
 
 - `zig build -Dtarget=[target triple] -Doptimize=ReleaseSmall` target triple can be things like `x86_64-windows` or `x86-macos` or `aarch64-linux-gnu` or any combination, or you can omit the target to build for your native platform
 

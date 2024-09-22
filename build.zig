@@ -1,11 +1,11 @@
 const std = @import("std");
-const Self = @This();
+const builtin = @import("builtin");
 
-pub fn build(b: *std.Build) void {
+pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const scetool = createSceTool(b, target, optimize);
+    const scetool = createSceTool(b, target, optimize, null);
 
     b.installArtifact(scetool);
 
@@ -58,12 +58,73 @@ pub fn build(b: *std.Build) void {
             .cpu_arch = .x86_64,
             .os_tag = .macos,
         }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .x86_64,
+            .os_tag = .linux,
+            .abi = .android,
+        }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .aarch64,
+            .os_tag = .linux,
+            .abi = .android,
+        }),
+        // TODO: re-enable once softfp ABI issues are fixed upstream in zig
+        // std.Build.resolveTargetQuery(b, std.Target.Query{
+        //     .cpu_arch = .arm,
+        //     .os_tag = .linux,
+        //     .abi = .android,
+        // }),
     };
 
-    for (package_targets) |package_target| {
-        const package = createSceTool(b, package_target, .ReleaseSmall);
+    const android_version = 21;
 
-        const dotnet_os = switch (package_target.result.os.tag) {
+    // attempts in order of cmd option, env var, default unix path
+    const ndk_root = b.option([]const u8, "ndk_root", "The NDK root") orelse
+        if (try std.process.hasEnvVar(b.allocator, "ANDROID_NDK_ROOT"))
+        try std.process.getEnvVarOwned(b.allocator, "ANDROID_NDK_ROOT")
+    else
+        "/opt/android-ndk";
+
+    for (package_targets) |package_target| {
+        const libc = if (package_target.result.abi == .android) blk: {
+            const android_triple = switch (package_target.result.cpu.arch) {
+                .x86_64 => "x86_64-linux-android",
+                .aarch64 => "aarch64-linux-android",
+                .arm => "arm-linux-androideabi",
+                else => @panic("TODO"),
+            };
+
+            const lib_dir = b.fmt("{s}/toolchains/llvm/prebuilt/{s}/sysroot/usr/lib/{s}/{d}/", .{
+                ndk_root,
+                comptime androidToolchainHostTag(),
+                android_triple,
+                android_version,
+            });
+            const include_dir = std.fs.path.resolve(b.allocator, &[_][]const u8{
+                ndk_root,
+                "toolchains",
+                "llvm",
+                "prebuilt",
+                comptime androidToolchainHostTag(),
+                "sysroot",
+                "usr",
+                "include",
+            }) catch unreachable;
+            const system_include_dir = std.fs.path.resolve(b.allocator, &[_][]const u8{ include_dir, android_triple }) catch unreachable;
+
+            break :blk try createLibCFile(b, android_version, @tagName(package_target.result.cpu.arch), include_dir, system_include_dir, lib_dir);
+        } else null;
+
+        const package = createSceTool(
+            b,
+            package_target,
+            .ReleaseSmall,
+            libc,
+        );
+
+        const dotnet_os = if (package_target.result.abi == .android)
+            "android"
+        else switch (package_target.result.os.tag) {
             .linux => "linux",
             .macos => "osx",
             .windows => "win",
@@ -71,7 +132,7 @@ pub fn build(b: *std.Build) void {
         };
         const dotnet_arch = switch (package_target.result.cpu.arch) {
             .x86_64 => "x64",
-            .arm => "arm32",
+            .arm => "arm",
             .aarch64 => "arm64",
             else => @panic("unknown arch, sorry"),
         };
@@ -88,8 +149,38 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
-    const zlib = createZlib(b, target, optimize);
+pub fn androidToolchainHostTag() []const u8 {
+    return @tagName(builtin.os.tag) ++ "-" ++ @tagName(builtin.cpu.arch);
+}
+
+fn createLibCFile(b: *std.Build, android_version: comptime_int, folder_name: []const u8, include_dir: []const u8, sys_include_dir: []const u8, crt_dir: []const u8) !std.Build.LazyPath {
+    const fname = b.fmt("android-{d}-{s}.conf", .{ android_version, folder_name });
+
+    var contents = std.ArrayList(u8).init(b.allocator);
+    errdefer contents.deinit();
+
+    var writer = contents.writer();
+
+    //  The directory that contains `stdlib.h`.
+    //  On POSIX-like systems, include directories be found with: `cc -E -Wp,-v -xc /dev/null
+    try writer.print("include_dir={s}\n", .{include_dir});
+
+    // The system-specific include directory. May be the same as `include_dir`.
+    // On Windows it's the directory that includes `vcruntime.h`.
+    // On POSIX it's the directory that includes `sys/errno.h`.
+    try writer.print("sys_include_dir={s}\n", .{sys_include_dir});
+
+    try writer.print("crt_dir={s}\n", .{crt_dir});
+    try writer.writeAll("msvc_lib_dir=\n");
+    try writer.writeAll("kernel32_lib_dir=\n");
+    try writer.writeAll("gcc_dir=\n");
+
+    const step = b.addWriteFiles();
+    return step.add(fname, contents.items);
+}
+
+fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, libc_file: ?std.Build.LazyPath) *std.Build.Step.Compile {
+    const zlib = createZlib(b, target, optimize, libc_file);
 
     const shared_lib_options: std.Build.SharedLibraryOptions = .{
         .name = "scetool",
@@ -101,8 +192,16 @@ fn createSceTool(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.
     scetool.linkLibCpp();
     scetool.linkLibrary(zlib);
     scetool.addIncludePath(b.path(zlib_include_dir));
+    scetool.setLibCFile(libc_file);
+    if (libc_file) |libc|
+        libc.addStepDependencies(&scetool.step);
 
-    scetool.addCSourceFiles(.{ .files = scetool_srcs });
+    const flags: []const []const u8 = if (target.result.abi == .android and target.result.cpu.arch == .arm)
+        &.{"-mfloat-abi=softfp"}
+    else
+        &.{};
+
+    scetool.addCSourceFiles(.{ .files = scetool_srcs, .flags = flags });
 
     if (optimize != .Debug)
         scetool.root_module.strip = true;
@@ -118,14 +217,23 @@ const root_path = root() ++ "/";
 
 pub const zlib_include_dir = root_path ++ "zlib";
 
-pub fn createZlib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode) *std.Build.Step.Compile {
+pub fn createZlib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, libc_file: ?std.Build.LazyPath) *std.Build.Step.Compile {
     var zlib = b.addStaticLibrary(.{
         .name = "z",
         .target = target,
         .optimize = optimize,
     });
+    zlib.setLibCFile(libc_file);
     zlib.linkLibC();
-    zlib.addCSourceFiles(.{ .files = zlib_srcs, .flags = &.{ "-std=c89", "-fPIC" } });
+
+    const flags: []const []const u8 = if (target.result.abi == .android and target.result.cpu.arch == .arm)
+        &.{ "-std=c89", "-fPIC", "-mfloat-abi=softfp" }
+    else
+        &.{ "-std=c89", "-fPIC" };
+
+    zlib.addCSourceFiles(.{ .files = zlib_srcs, .flags = flags });
+    if (libc_file) |libc|
+        libc.addStepDependencies(&zlib.step);
 
     return zlib;
 }
