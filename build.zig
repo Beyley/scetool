@@ -68,12 +68,11 @@ pub fn build(b: *std.Build) !void {
             .os_tag = .linux,
             .abi = .android,
         }),
-        // TODO: re-enable once softfp ABI issues are fixed upstream in zig
-        // std.Build.resolveTargetQuery(b, std.Target.Query{
-        //     .cpu_arch = .arm,
-        //     .os_tag = .linux,
-        //     .abi = .android,
-        // }),
+        std.Build.resolveTargetQuery(b, std.Target.Query{
+            .cpu_arch = .arm,
+            .os_tag = .linux,
+            .abi = .androideabi,
+        }),
         std.Build.resolveTargetQuery(b, std.Target.Query{
             .cpu_arch = .aarch64,
             .os_tag = .ios,
@@ -111,7 +110,7 @@ pub fn build(b: *std.Build) !void {
         if (package_target.result.abi == .simulator and ios_simulator_sdk_root == null)
             continue;
 
-        const libc = if (package_target.result.abi == .android) blk: {
+        const libc = if (package_target.result.isAndroid()) blk: {
             const android_triple = switch (package_target.result.cpu.arch) {
                 .x86_64 => "x86_64-linux-android",
                 .aarch64 => "aarch64-linux-android",
@@ -181,7 +180,7 @@ pub fn build(b: *std.Build) !void {
                 null,
         );
 
-        const dotnet_os = if (package_target.result.abi == .android)
+        const dotnet_os = if (package_target.result.isAndroid())
             "android"
         else switch (package_target.result.os.tag) {
             .linux => "linux",
@@ -265,12 +264,7 @@ fn createSceTool(
     if (libc_file) |libc|
         libc.addStepDependencies(&scetool.step);
 
-    const flags: []const []const u8 = if (target.result.abi == .android and target.result.cpu.arch == .arm)
-        &.{"-mfloat-abi=softfp"}
-    else
-        &.{};
-
-    scetool.addCSourceFiles(.{ .files = scetool_srcs, .flags = flags });
+    scetool.addCSourceFiles(.{ .files = scetool_srcs });
 
     if (optimize != .Debug)
         scetool.root_module.strip = true;
@@ -295,12 +289,7 @@ pub fn createZlib(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std
     zlib.setLibCFile(libc_file);
     zlib.linkLibC();
 
-    const flags: []const []const u8 = if (target.result.abi == .android and target.result.cpu.arch == .arm)
-        &.{ "-std=c89", "-fPIC", "-mfloat-abi=softfp" }
-    else
-        &.{ "-std=c89", "-fPIC" };
-
-    zlib.addCSourceFiles(.{ .files = zlib_srcs, .flags = flags });
+    zlib.addCSourceFiles(.{ .files = zlib_srcs, .flags = &.{ "-std=c89", "-fPIC" } });
     if (libc_file) |libc|
         libc.addStepDependencies(&zlib.step);
 
