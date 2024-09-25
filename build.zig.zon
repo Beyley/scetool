@@ -1,0 +1,17 @@
+.{
+    .name = "scetool",
+    .version = "0.0.0",
+
+    .dependencies = .{
+        .zlib = .{
+            .url = "git+https://github.com/Beyley/zlib#a7934a3b51a2bb7fc75132d802dc7dd71cb2eaf4",
+            .hash = "1220e213b83e7f9c01f4134caf8e956f65bbd1ea6e49cf0652ec2ddcb79ebe6a5b11",
+        },
+    },
+
+    .paths = .{
+        "src/",
+        "build.zig",
+        "build.zig.zon",
+    },
+}
