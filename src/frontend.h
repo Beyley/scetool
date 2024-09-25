@@ -6,15 +6,11 @@
 #ifndef _FRONTEND_H_
 #define _FRONTEND_H_
 
-#if __cplusplus
-#define export extern "C"
-#else
-#define export
-#endif
-
 // if windows, we have to use __desclspec(dllexport)
 #ifdef _WIN32
-#define export extern "C" __declspec(dllexport)
+#define export __declspec(dllexport)
+#else
+#define export
 #endif
 
 export void frontend_print_infos(s8 const *file);

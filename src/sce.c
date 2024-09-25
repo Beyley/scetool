@@ -466,24 +466,6 @@ void _sce_fixup_keys(sce_buffer_ctxt_t *ctxt)
 	// Allocate and fill keys array.
 	ctxt->keys = (u8 *)malloc(sizeof(u8) * ctxt->keys_len);
 	_fill_rand_bytes(ctxt->keys, ctxt->keys_len);
-
-#ifndef CONFIG_PRIVATE_BUILD
-	time_t rawtime;
-	struct tm *ti;
-	s8 buf[16 + 1];
-
-	time(&rawtime);
-	ti = localtime(&rawtime);
-	sprintf(buf, "%02d%02d%02d::%02d%02d%04d",
-			ti->tm_hour, ti->tm_min, ti->tm_sec,
-			ti->tm_mday, ti->tm_mon, ti->tm_year + 1900);
-
-	memcpy(ctxt->keys + 0x20, "SURPRIZE :D " /**/, 12);
-	memcpy(ctxt->keys + 0x30, "IM IN UR KEYZ !!", 16);
-	u8 foo[16] = {0x09, 0xB8, 0xBE, 0xAE, 0x83, 0xC0, 0x17, 0xA6, 0x3B, 0x11, 0xB0, 0x50, 0xC4, 0xCE, 0xED, 0xF9};
-	memcpy(ctxt->keys + 0x40, foo, 16);
-	memcpy(ctxt->keys + 0x50, buf, 16);
-#endif
 }
 
 /*! Increase offset and align it. */

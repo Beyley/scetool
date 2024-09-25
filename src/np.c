@@ -188,12 +188,11 @@ BOOL np_create_ci(npdrm_config_t *npconf, ci_data_npdrm_t *cinp)
 	cinp->license_type = npconf->license_type;
 	cinp->app_type = npconf->app_type;
 	memcpy(cinp->content_id, npconf->content_id, 0x30);
-#ifdef CONFIG_PRIVATE_BUILD
-	_fill_rand_bytes(cinp->rndpad, 0x10);
-#else
+
+	// _fill_rand_bytes(cinp->rndpad, 0x10);
+
 	// Better than boring random bytes!
 	memcpy(cinp->rndpad, CONFIG_NPDRM_WATERMARK, 0x10);
-#endif
 	cinp->unknown_1 = 0;
 	cinp->unknown_2 = 0;
 

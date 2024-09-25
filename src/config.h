@@ -1,7 +1,7 @@
 /*
-* Copyright (c) 2011-2013 by naehrwert
-* This file is released under the GPLv2.
-*/
+ * Copyright (c) 2011-2013 by naehrwert
+ * This file is released under the GPLv2.
+ */
 
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
@@ -9,41 +9,18 @@
 /*! scetool base version. */
 #define SCETOOL_VERSION_BASE "0.2.9"
 
-/*! Private build. */
-//#define CONFIG_PRIVATE_BUILD
-#define BUILD_FOR "naehrwert"
-//#define BUILD_FOR "unicorns"
-
 /*! scetool version. */
-#ifdef CONFIG_PRIVATE_BUILD
-	#ifdef BUILD_FOR
-		#define SCETOOL_VERSION SCETOOL_VERSION_BASE " <PRIVATE BUILD:" BUILD_FOR ">"
-	#else
-		#error Specify a name in BUILD_FOR.
-	#endif
-#else
-	#define SCETOOL_VERSION SCETOOL_VERSION_BASE " <public build>"
-#endif
+#define SCETOOL_VERSION SCETOOL_VERSION_BASE " <Refresher build>"
 
 /*! Private build options. */
 #ifdef CONFIG_PRIVATE_BUILD
-	#define CONFIG_CUSTOM_INDIV_SEED
-	#define CONFIG_DUMP_INDIV_SEED
-#endif
-
-#if 0
-/*! scetool API. */
-#define CONFIG_EXPORTS
-#ifdef CONFIG_EXPORTS
-#define SCETOOL_API __declspec(dllexport)
-#else
-#define SCETOOL_API __declspec(dllimport)
-#endif
+#define CONFIG_CUSTOM_INDIV_SEED
+#define CONFIG_DUMP_INDIV_SEED
 #endif
 
 /*! NPDRM watermark text (16 bytes exactly). */
 //"I like kittens !"
-#define CONFIG_NPDRM_WATERMARK "watermarktrololo"
+#define CONFIG_NPDRM_WATERMARK "scetoolRefresher"
 
 /*! Environment variables. */
 #define CONFIG_ENV_PS3 "PS3"

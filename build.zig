@@ -3,22 +3,22 @@ const builtin = @import("builtin");
 
 const scetool_src_dir = "src/";
 const scetool_srcs = &.{
-    scetool_src_dir ++ "aes_omac.cpp",
-    scetool_src_dir ++ "bn.cpp",
-    scetool_src_dir ++ "ec.cpp",
-    scetool_src_dir ++ "ecdsa.cpp",
-    scetool_src_dir ++ "frontend.cpp",
-    scetool_src_dir ++ "keys.cpp",
-    scetool_src_dir ++ "list.cpp",
-    scetool_src_dir ++ "mt19937.cpp",
-    scetool_src_dir ++ "np.cpp",
-    scetool_src_dir ++ "rvk.cpp",
-    scetool_src_dir ++ "sce.cpp",
-    scetool_src_dir ++ "self.cpp",
-    scetool_src_dir ++ "tables.cpp",
-    scetool_src_dir ++ "util.cpp",
-    scetool_src_dir ++ "spp.cpp",
-    scetool_src_dir ++ "scetool_main.cpp",
+    scetool_src_dir ++ "aes_omac.c",
+    scetool_src_dir ++ "bn.c",
+    scetool_src_dir ++ "ec.c",
+    scetool_src_dir ++ "ecdsa.c",
+    scetool_src_dir ++ "frontend.c",
+    scetool_src_dir ++ "keys.c",
+    scetool_src_dir ++ "list.c",
+    scetool_src_dir ++ "mt19937.c",
+    scetool_src_dir ++ "np.c",
+    scetool_src_dir ++ "rvk.c",
+    scetool_src_dir ++ "sce.c",
+    scetool_src_dir ++ "self.c",
+    scetool_src_dir ++ "tables.c",
+    scetool_src_dir ++ "util.c",
+    scetool_src_dir ++ "spp.c",
+    scetool_src_dir ++ "scetool_main.c",
     scetool_src_dir ++ "aes.c",
     scetool_src_dir ++ "sha1.c",
 };
@@ -160,6 +160,8 @@ pub fn build(b: *std.Build) !void {
                 null,
         );
 
+        package.defineCMacro("PACKAGE", "1");
+
         const install_step = b.addInstallLibFile(package.getEmittedBin(), getDotnetRuntimePath(b, target));
         install_step.step.dependOn(&package.step);
         package_step.dependOn(&install_step.step);
@@ -208,7 +210,8 @@ fn createSceTool(
     if (libc_file) |libc|
         libc.addStepDependencies(&scetool.step);
 
-    scetool.addCSourceFiles(.{ .files = scetool_srcs });
+    // Yes I know __DATE__ and __TIME__ break reproducable builds, no, I don't care
+    scetool.addCSourceFiles(.{ .files = scetool_srcs, .flags = &.{"-Wno-date-time"} });
 
     if (optimize != .Debug)
         scetool.root_module.strip = true;
